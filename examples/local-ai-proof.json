@@ -1,0 +1,469 @@
+{
+  "draft": {
+    "code": "function average(values) {\n  if (values.length === 0) {\n    return 0;\n  }\n  return values.reduce((sum, value) => sum + value, 0) / values.length;\n}",
+    "explanation": "The original code was intended to calculate the average of an array of numbers. However, it was missing a check for empty input and a correct initial value for the sum. The repair adds these checks and initializes the sum to 0 to avoid division by zero. This ensures the function works correctly with empty arrays and single numbers, returning 0 for empty input and the correct average for other inputs.",
+    "model": "qwen2.5:1.5b",
+    "verified": false
+  },
+  "run": {
+    "id": "8ca37c42-74cf-4601-9b73-b1632a338303",
+    "createdAt": "2026-11-06T09:24:36.469Z",
+    "status": "verified",
+    "summary": "The bug is reproduced, the fix passes, and all recorded behavior stays intact.",
+    "spec": {
+      "project": "demo-analytics",
+      "entry": "average",
+      "title": "An empty list has an average of zero",
+      "repro": {
+        "id": "repro",
+        "name": "Empty input returns zero",
+        "args": [
+          []
+        ],
+        "expect": 0
+      },
+      "checks": [
+        {
+          "id": "check-0",
+          "name": "Positive numbers",
+          "args": [
+            [
+              2,
+              4,
+              6
+            ]
+          ],
+          "expect": 4
+        },
+        {
+          "id": "check-1",
+          "name": "A single number",
+          "args": [
+            [
+              7
+            ]
+          ],
+          "expect": 7
+        },
+        {
+          "id": "check-2",
+          "name": "Negative numbers",
+          "args": [
+            [
+              -8,
+              -4
+            ]
+          ],
+          "expect": -6
+        },
+        {
+          "id": "check-3",
+          "name": "Zero is a valid value",
+          "args": [
+            [
+              0,
+              0
+            ]
+          ],
+          "expect": 0
+        }
+      ]
+    },
+    "beforeHash": "b476844f091376c76f961a8de795bc424a848d4ea59f6bb13bd4267369e5027e",
+    "afterHash": "01357fd1941e6a320902e8066beeed7ba28b0f67ddf02b87dc2b32a20eaacfa7",
+    "before": "function average(values) {\n  return values.reduce((sum, value) => sum + value)\n    / values.length;\n}",
+    "after": "function average(values) {\n  if (values.length === 0) {\n    return 0;\n  }\n  return values.reduce((sum, value) => sum + value, 0) / values.length;\n}",
+    "runtime": "v24.20.0",
+    "platform": "win32",
+    "repeats": 3,
+    "memoryCount": 0,
+    "beforeResults": [
+      {
+        "id": "repro",
+        "name": "Empty input returns zero",
+        "args": [
+          []
+        ],
+        "expect": 0,
+        "valid": true,
+        "passes": 0,
+        "repeats": 3,
+        "stable": true,
+        "passed": false,
+        "observations": [
+          {
+            "repeat": 0,
+            "id": "repro",
+            "kind": "throw",
+            "name": "TypeError",
+            "message": "Reduce of empty array with no initial value"
+          },
+          {
+            "repeat": 1,
+            "id": "repro",
+            "kind": "throw",
+            "name": "TypeError",
+            "message": "Reduce of empty array with no initial value"
+          },
+          {
+            "repeat": 2,
+            "id": "repro",
+            "kind": "throw",
+            "name": "TypeError",
+            "message": "Reduce of empty array with no initial value"
+          }
+        ]
+      },
+      {
+        "id": "check-0",
+        "name": "Positive numbers",
+        "args": [
+          [
+            2,
+            4,
+            6
+          ]
+        ],
+        "expect": 4,
+        "valid": true,
+        "passes": 3,
+        "repeats": 3,
+        "stable": true,
+        "passed": true,
+        "observations": [
+          {
+            "repeat": 0,
+            "id": "check-0",
+            "kind": "return",
+            "value": 4
+          },
+          {
+            "repeat": 1,
+            "id": "check-0",
+            "kind": "return",
+            "value": 4
+          },
+          {
+            "repeat": 2,
+            "id": "check-0",
+            "kind": "return",
+            "value": 4
+          }
+        ]
+      },
+      {
+        "id": "check-1",
+        "name": "A single number",
+        "args": [
+          [
+            7
+          ]
+        ],
+        "expect": 7,
+        "valid": true,
+        "passes": 3,
+        "repeats": 3,
+        "stable": true,
+        "passed": true,
+        "observations": [
+          {
+            "repeat": 0,
+            "id": "check-1",
+            "kind": "return",
+            "value": 7
+          },
+          {
+            "repeat": 1,
+            "id": "check-1",
+            "kind": "return",
+            "value": 7
+          },
+          {
+            "repeat": 2,
+            "id": "check-1",
+            "kind": "return",
+            "value": 7
+          }
+        ]
+      },
+      {
+        "id": "check-2",
+        "name": "Negative numbers",
+        "args": [
+          [
+            -8,
+            -4
+          ]
+        ],
+        "expect": -6,
+        "valid": true,
+        "passes": 3,
+        "repeats": 3,
+        "stable": true,
+        "passed": true,
+        "observations": [
+          {
+            "repeat": 0,
+            "id": "check-2",
+            "kind": "return",
+            "value": -6
+          },
+          {
+            "repeat": 1,
+            "id": "check-2",
+            "kind": "return",
+            "value": -6
+          },
+          {
+            "repeat": 2,
+            "id": "check-2",
+            "kind": "return",
+            "value": -6
+          }
+        ]
+      },
+      {
+        "id": "check-3",
+        "name": "Zero is a valid value",
+        "args": [
+          [
+            0,
+            0
+          ]
+        ],
+        "expect": 0,
+        "valid": true,
+        "passes": 3,
+        "repeats": 3,
+        "stable": true,
+        "passed": true,
+        "observations": [
+          {
+            "repeat": 0,
+            "id": "check-3",
+            "kind": "return",
+            "value": 0
+          },
+          {
+            "repeat": 1,
+            "id": "check-3",
+            "kind": "return",
+            "value": 0
+          },
+          {
+            "repeat": 2,
+            "id": "check-3",
+            "kind": "return",
+            "value": 0
+          }
+        ]
+      }
+    ],
+    "afterResults": [
+      {
+        "id": "repro",
+        "name": "Empty input returns zero",
+        "args": [
+          []
+        ],
+        "expect": 0,
+        "valid": true,
+        "passes": 3,
+        "repeats": 3,
+        "stable": true,
+        "passed": true,
+        "observations": [
+          {
+            "repeat": 0,
+            "id": "repro",
+            "kind": "return",
+            "value": 0
+          },
+          {
+            "repeat": 1,
+            "id": "repro",
+            "kind": "return",
+            "value": 0
+          },
+          {
+            "repeat": 2,
+            "id": "repro",
+            "kind": "return",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "id": "check-0",
+        "name": "Positive numbers",
+        "args": [
+          [
+            2,
+            4,
+            6
+          ]
+        ],
+        "expect": 4,
+        "valid": true,
+        "passes": 3,
+        "repeats": 3,
+        "stable": true,
+        "passed": true,
+        "observations": [
+          {
+            "repeat": 0,
+            "id": "check-0",
+            "kind": "return",
+            "value": 4
+          },
+          {
+            "repeat": 1,
+            "id": "check-0",
+            "kind": "return",
+            "value": 4
+          },
+          {
+            "repeat": 2,
+            "id": "check-0",
+            "kind": "return",
+            "value": 4
+          }
+        ]
+      },
+      {
+        "id": "check-1",
+        "name": "A single number",
+        "args": [
+          [
+            7
+          ]
+        ],
+        "expect": 7,
+        "valid": true,
+        "passes": 3,
+        "repeats": 3,
+        "stable": true,
+        "passed": true,
+        "observations": [
+          {
+            "repeat": 0,
+            "id": "check-1",
+            "kind": "return",
+            "value": 7
+          },
+          {
+            "repeat": 1,
+            "id": "check-1",
+            "kind": "return",
+            "value": 7
+          },
+          {
+            "repeat": 2,
+            "id": "check-1",
+            "kind": "return",
+            "value": 7
+          }
+        ]
+      },
+      {
+        "id": "check-2",
+        "name": "Negative numbers",
+        "args": [
+          [
+            -8,
+            -4
+          ]
+        ],
+        "expect": -6,
+        "valid": true,
+        "passes": 3,
+        "repeats": 3,
+        "stable": true,
+        "passed": true,
+        "observations": [
+          {
+            "repeat": 0,
+            "id": "check-2",
+            "kind": "return",
+            "value": -6
+          },
+          {
+            "repeat": 1,
+            "id": "check-2",
+            "kind": "return",
+            "value": -6
+          },
+          {
+            "repeat": 2,
+            "id": "check-2",
+            "kind": "return",
+            "value": -6
+          }
+        ]
+      },
+      {
+        "id": "check-3",
+        "name": "Zero is a valid value",
+        "args": [
+          [
+            0,
+            0
+          ]
+        ],
+        "expect": 0,
+        "valid": true,
+        "passes": 3,
+        "repeats": 3,
+        "stable": true,
+        "passed": true,
+        "observations": [
+          {
+            "repeat": 0,
+            "id": "check-3",
+            "kind": "return",
+            "value": 0
+          },
+          {
+            "repeat": 1,
+            "id": "check-3",
+            "kind": "return",
+            "value": 0
+          },
+          {
+            "repeat": 2,
+            "id": "check-3",
+            "kind": "return",
+            "value": 0
+          }
+        ]
+      }
+    ],
+    "gates": [
+      {
+        "name": "Bug reproduced",
+        "passed": true,
+        "detail": "The original code must fail the new test on all three runs."
+      },
+      {
+        "name": "Starting checks valid",
+        "passed": true,
+        "detail": "Existing-behavior tests must pass before the change."
+      },
+      {
+        "name": "Fix works",
+        "passed": true,
+        "detail": "The proposed code must pass the new test on all three runs."
+      },
+      {
+        "name": "Earlier behavior protected",
+        "passed": true,
+        "detail": "Existing checks and saved lessons must pass after the change."
+      },
+      {
+        "name": "Repeat check",
+        "passed": true,
+        "detail": "Three runs must agree on pass/fail, without runner errors. This samples repeatability, not proof of determinism."
+      }
+    ]
+  }
+}

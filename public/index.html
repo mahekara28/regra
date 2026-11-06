@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173e33">
+  <title>REGRA · Every fix earns its proof.</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <aside class="sidebar">
+    <a class="brand" href="#workbench" aria-label="REGRA home"><span class="brandmark" aria-hidden="true">r<span>↗</span></span><span>REGRA<small>EXECUTABLE MEMORY</small></span></a>
+    <div class="workspace-label">PERSONAL WORKSPACE</div>
+    <nav aria-label="Main navigation">
+      <button class="nav active" data-view="workbench"><span aria-hidden="true">⌘</span>Workbench</button>
+      <button class="nav" data-view="lessons"><span aria-hidden="true">▤</span>Lesson library <b id="nav-count">0</b></button>
+      <button class="nav" data-view="history"><span aria-hidden="true">↺</span>Run history</button>
+      <button class="nav" data-view="guide"><span aria-hidden="true">◎</span>Field guide</button>
+    </nav>
+    <div class="sidebar-note"><span class="tiny-label">THE PRINCIPLE</span><p>A fix is a claim.<br>A passing test is evidence.</p><div class="small-line"></div><small>Your code. Your machine.<br>No account or paid API required.</small></div>
+    <div class="sidebar-bottom"><span class="status-dot"></span> LOCAL PROTOTYPE <span>v0.1</span></div>
+  </aside>
+  <div class="main-shell">
+    <header class="topbar"><span>Personal workspace <span class="slash">/</span> <strong id="page-name">Workbench</strong></span><div><span class="local-tag"><span class="status-dot"></span>Local only</span><button class="text-button" id="export">Export lessons <span aria-hidden="true">↗</span></button></div></header>
+    <main id="main" tabindex="-1">
+      <div id="notice" role="status" aria-live="polite" hidden></div>
+      <section id="view-workbench" class="view">
+        <div class="hero"><div><div class="eyebrow"><span></span> BUILD CONFIDENCE, ONE FAILURE AT A TIME</div><h1>Turn a bug into<br>a lasting lesson<span class="green">.</span></h1><p>Reproduce what broke. Put the fix to the test.<br>Keep the lesson for the next change.</p></div><div class="proof-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="art-center">r<span>↗</span></div><div class="art-label art-label-one"><i class="red-dot"></i>failure captured</div><div class="art-label art-label-two"><i class="status-dot"></i>lesson retained</div><div class="art-caption">FAIL → VERIFY → REMEMBER</div></div></div>
+        <div class="metrics"><div><span class="metric-icon">✓</span><div><strong id="metric-verified">0</strong><span>verified fixes</span></div></div><div><span class="metric-icon">▤</span><div><strong id="metric-lessons">0</strong><span>lessons retained</span></div></div><div><span class="metric-icon">⊘</span><div><strong id="metric-rejected">0</strong><span>fixes rejected</span></div></div><p>Real executions.<br>Evidence stays on this device.</p></div>
+        <div class="section-heading"><div><span class="eyebrow">THE WORKBENCH</span><h2>One small bug. A stronger next change.</h2></div><span class="pill">JavaScript · synchronous functions</span></div>
+        <div class="panel case-panel">
+          <div class="step-heading"><span class="step-no">01</span><div><h3>Choose a failure</h3><p>Start with an example, or bring a self-contained function.</p></div><button id="custom" class="text-button">Use my own function ↗</button></div>
+          <div id="example-options" class="example-options"></div>
+          <div class="case-description" id="case-description"></div>
+          <div class="form-grid"><label>Project key<input id="project" autocomplete="off" maxlength="80"></label><label>Function name<input id="entry" autocomplete="off" maxlength="80"></label><label class="wide">What should this lesson protect?<input id="title" maxlength="150"></label></div>
+          <div class="contract-heading"><h4>The behavior you expect</h4><span>You set the rule. The AI gets no vote.</span></div>
+          <div class="behavior-grid"><label>Function arguments <span class="hint">JSON array of arguments</span><textarea id="args" rows="2" spellcheck="false" aria-describedby="args-help"></textarea><small id="args-help">Put each argument inside an outer JSON array.</small></label><label>Expected result <span class="hint">A JSON value or error name</span><div class="expected-controls"><select id="expect-mode" aria-label="Expected outcome type"><option value="expect">Returns</option><option value="throws">Throws</option></select><textarea id="expect" rows="2" spellcheck="false"></textarea></div><small id="expect-help">Choose the result your app should produce.</small></label></div>
+          <details class="checks-details"><summary>Existing behavior <span id="checks-count">4 checks</span><span class="hint">Review or edit tests</span></summary><p>These cases must pass before and after the fix. Use <code>expect</code> for a JSON result or <code>throws</code> for an error name.</p><label class="sr-only" for="checks">Existing-behavior test cases as JSON</label><textarea id="checks" class="json-editor" rows="12" spellcheck="false"></textarea></details>
+        </div>
+        <div class="panel code-panel"><div class="step-heading"><span class="step-no">02</span><div><h3>Put a fix to the test</h3><p>Compare the original code with a proposed change.</p></div></div>
+          <div class="code-toolbar"><div class="button-group"><button id="good-fix" class="soft-button">Load example fix</button><button id="bad-fix" class="text-button">Try a broken fix</button></div><div class="ai-controls"><label class="sr-only" for="model">Local AI model</label><select id="model"><option value="">Checking local AI…</option></select><button id="suggest" class="soft-button" disabled>Ask local AI <span aria-hidden="true">✦</span></button></div></div>
+          <div class="editors"><div><div class="editor-label"><span><i class="red-dot"></i> ORIGINAL CODE</span><span>before.js</span></div><label for="before" class="sr-only">Original JavaScript code</label><textarea id="before" class="code-editor" spellcheck="false"></textarea></div><div><div class="editor-label"><span><i class="status-dot"></i> PROPOSED FIX</span><span id="draft-label">candidate.js</span></div><label for="after" class="sr-only">Proposed JavaScript fix</label><textarea id="after" class="code-editor" spellcheck="false"></textarea></div></div>
+          <p id="ai-note" class="ai-note">Manual edits and the example fixes work without an AI model.</p>
+          <div class="verify-bar"><div><strong>Five gates. One clear result.</strong><span>Reproduction · starting checks · fix · earlier behavior · repeatability</span></div><button id="verify" class="primary-button">Verify this fix <span aria-hidden="true">→</span></button></div>
+          <p class="scope-note">Run code you have reviewed. This local prototype supports plain functions with JSON inputs and outputs; no imports, browser APIs, or async code.</p>
+        </div>
+        <section id="result" class="result" aria-live="polite" hidden></section>
+        <div class="closing-note"><span>03</span><p><strong>A verified fix becomes an executable lesson.</strong> Future checks for the same project and function replay it automatically. Tests protect the behavior they cover.</p><button class="text-button" data-view="lessons">Open the library ↗</button></div>
+      </section>
+      <section id="view-lessons" class="view" hidden><div class="page-intro"><span class="eyebrow">KNOWLEDGE YOU CAN RUN</span><h1>The lesson library<span class="green">.</span></h1><p>Each lesson connects a reproducible failure to a verified fix.<br>Matching project and function names keep that behavior protected.</p></div><label class="search-label">Find a lesson<input id="search" type="search" placeholder="Search by project, function, or lesson…"></label><div id="lesson-list"></div></section>
+      <section id="view-history" class="view" hidden><div class="page-intro"><span class="eyebrow">THE EVIDENCE TRAIL</span><h1>Every attempt counts<span class="green">.</span></h1><p>Inspect what passed, what failed, and which code was tested.</p></div><div id="history-list"></div><section id="history-result" class="result" hidden></section></section>
+      <section id="view-guide" class="view" hidden><div class="page-intro"><span class="eyebrow">A SIMPLE IDEA, MADE PRACTICAL</span><h1>Every fix earns<br>its proof<span class="green">.</span></h1><p>REGRA stores executable lessons around your coding workflow.<br>It does not retrain your AI model.</p></div><div class="guide-grid"><article class="panel"><span class="step-no">01</span><h3>Describe the mistake</h3><p>Provide an input and the result your app should return. REGRA runs that case against the original code to prove the bug exists.</p></article><article class="panel"><span class="step-no">02</span><h3>Challenge the fix</h3><p>Write a repair, paste one from your coding assistant, or ask an installed local model. A draft stays unverified until you run it.</p></article><article class="panel"><span class="step-no">03</span><h3>Keep the evidence</h3><p>When all gates pass, REGRA saves the test, code fingerprints, runtime version and result. Existing lessons are checked again on later fixes.</p></article></div><div class="panel guide-detail"><h2>For developers</h2><p>The app and CLI use the same verification engine. From the REGRA folder:</p><pre>node src/cli.mjs demo
+
+node src/cli.mjs verify \
+  --case examples/average.case.json \
+  --before examples/average.before.js \
+  --after examples/average.fixed.js
+
+node src/cli.mjs check \
+  --case examples/average.case.json \
+  --source examples/average.fixed.js
+
+node src/cli.mjs context --project demo-analytics</pre><p>Backslashes above split a command in Bash. On Windows, enter each command on one line. Exit code 0 means passed; 1 means rejected or inconclusive; 2 means a setup error.</p><h3>Use it with a coding assistant</h3><p>Copy the context command’s output into any assistant. Ask it to preserve the recorded behavior, then verify its code with REGRA. Direct editor integrations and whole-repository verification are planned.</p><h3>How it stays free to run</h3><p>No package dependencies, account, subscription, or paid API. The app runs on your computer. Optional AI uses your existing Ollama installation and a local model; performance depends on your hardware.</p><h3>What a green result means</h3><p>The recorded cases passed on this code, under this runtime. Three repeat runs can reveal some unstable tests; they cannot prove a program has no bugs. Expected behavior needs human review.</p><h3>Current boundaries</h3><p>v0.1 handles reviewed, self-contained synchronous JavaScript functions. It is not a sandbox for hostile code. Full repositories, Python, browser tests, editor integrations, and shared team libraries belong to later milestones.</p></div></section>
+      <footer><span>REGRA / EVERY FIX EARNS ITS PROOF.</span><span>Local by default. Evidence by design.</span></footer>
+    </main>
+  </div>
+</body>
+</html>

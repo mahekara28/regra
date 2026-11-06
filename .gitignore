@@ -1,0 +1,3 @@
+.regra/
+node_modules/
+*.log
