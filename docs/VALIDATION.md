@@ -48,6 +48,10 @@ Exercised the real interface: reject a broken fix, verify a correct fix, persist
 
 Browser automation is a development check, not a runtime dependency of the delivered app. It used the workspace's existing Playwright installation.
 
+The verification-desk redesign was checked across all five views at **1440, 1024, 768, 390 and 320 pixels** wide with no horizontal page overflow. Browser checks also covered the contract preview, synchronized line counts, resetting a candidate, Control+Enter verification, clearing stale results, expected/observed output display, decision filters and empty filtered states, and navigating from a retained lesson to its original proof. The 30-test suite passed again after the redesign. No new runtime dependency or external font service was added.
+
+The turquoise/navy theme was checked again through the same browser flow and five screen widths. Desktop and mobile screenshots were inspected. Sampled text/background pairs ranged from **5.97:1 to 15.86:1** contrast; the primary button label measured **9.53:1**, and input borders against their fill measured **3.19:1**. Success, rejection and inconclusive states retain separate green, coral and amber colors and text labels.
+
 A concurrent test run exposed a 200 ms execution limit that was too sensitive to host load. The delivered runner allows one second per evaluation and marks remaining cases unexecuted after a timeout. This preserves an inconclusive result without repeatedly spending the timeout budget.
 
 ## Earlier local model check retained from v0.1

@@ -119,6 +119,8 @@ regra ui --root /path/to/project
 
 Open **http://127.0.0.1:4317**. Compare a prepared bad fix and correct fix, inspect lessons, and use Connections for setup. Optional AI drafts use installed local Ollama models and never bypass verification.
 
+The verification desk keeps the behavior contract beside both code versions. Existing checks have a readable preview, and results show expected values beside observed outputs. Use **Ctrl+Enter** (Command+Enter on macOS) to verify, **Reset** to restore the candidate from the original, and the Evidence filters to inspect a particular decision. Saved lessons link back to their original proof. The dashboard uses a turquoise/navy theme with technical sans-serif headings. All typography and assets load locally.
+
 ```sh
 regra connect --client claude --root . --dry-run
 regra connections --root .
