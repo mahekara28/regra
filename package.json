@@ -18,6 +18,9 @@
     "start": "node src/server.mjs",
     "test": "node --test tests/*.test.mjs",
     "demo": "node src/cli.mjs demo",
+    "site:build": "node scripts/site/build.mjs",
+    "site:preview": "node scripts/site/preview.mjs",
+    "test:site": "node --test tests/site.test.mjs",
     "typecheck": "tsc -p tsconfig.types.json",
     "test:package": "node scripts/package-smoke.mjs"
   },

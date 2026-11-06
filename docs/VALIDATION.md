@@ -65,3 +65,15 @@ The actual draft and full execution record are in `examples/local-ai-proof.json`
 This pass did not interactively connect all four actual editor products. Configuration-format tests and protocol calls establish those layers, while the user's agent calling regra_status confirms its own loading/trust setup.
 
 Linux/macOS, every supported Node version, hostile-code isolation, large lesson libraries, whole repositories, external test frameworks and every Ollama model remain unvalidated. This beta supports reviewed synchronous standalone JavaScript. No automatic Context Relay exchange has been implemented.
+
+## Public website
+
+Added the standalone `site/` introduction and playground on 6 November 2026. After this addition, **`npm test`: 33 passed, 0 failed** and **`npm run typecheck` passed** on the Windows/Node 24 environment above.
+
+The three added Node tests cover rejection, verification, lesson retention, scoped replay and regression detection for all three prepared examples; agreement between browser examples, shipped case contracts and the real Node engine; and the public build allowlist, relative assets, anchors, project-path routing, method restrictions and recovery from missing routes. Browser examples do not evaluate arbitrary source text.
+
+Headless Chrome checks passed at **1440, 1024, 768, 390 and 320 pixels**. Checked all three install modes and four client selectors, successful and denied clipboard access, all three demo cases, disabled controls before verification, retention only after passing, regression replay, case switching, reset, reload clearing, stale-result invalidation, downloaded JSON, keyboard activation, skip navigation, native FAQ disclosure, instructions without JavaScript and nested 404 recovery. No horizontal page overflow, runtime errors, missing normal-page assets or third-party requests were observed. The SDK code copied from the actual website was executed with the local library in an isolated scratch project and returned `verified`.
+
+The initial engine-parity test needed validated case IDs, and the clipboard assertion needed Windows CRLF normalization; both test-harness issues were corrected before the successful runs. Desktop, mobile, playground, installation and social-card captures were visually reviewed. The workbench asset is a crop of an actual local-dashboard capture using example data.
+
+The static preview runs under `/regra/`, matching the intended GitHub Pages path. Browser automation used the existing workspace Playwright/Chrome tools and did not add a runtime dependency. The Pages workflow was prepared but has not been run on GitHub or deployed by this task. The GitHub source-install route depends on the current package implementation being pushed; no npm registry release is claimed.

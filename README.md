@@ -8,6 +8,20 @@ Use REGRA as a **JavaScript/TypeScript library**, **local MCP server**, **CLI**,
 
 > **Release status:** this checkout contains `0.2.0-beta.1`, not yet published to npm. Use the local installation below. GitHub installation requires pushing these changes first; registry installation requires a separate npm release.
 
+## Public demo website
+
+The turquoise/navy product website lives in [`site/`](site/). It includes three interactive browser examples, agent-specific setup commands, a library example, an actual workbench capture and documentation links. From this repository checkout:
+
+```sh
+npm run site:preview
+```
+
+Open **http://127.0.0.1:4318/regra/**. Node alone is enough for the static preview; it uses the same `/regra/` path as GitHub Pages. The existing local dashboard still starts with `npm start` on port 4317.
+
+The website's prepared functions run in the browser; temporary demo lessons reset on reload. It does not access a visitor's projects or agents. The installed library/MCP server/dashboard perform real project verification and retain evidence on disk.
+
+The deployment target is **https://mahekara28.github.io/regra/**. Publishing requires enabling GitHub Actions in the repository's Pages settings and pushing the website changes to `main`; adding these files alone does not make it live. See the [website and deployment guide](docs/WEBSITE.md).
+
 ## Connect an agent
 
 Requires **Node.js 22.13+**. From this updated REGRA checkout, install once:

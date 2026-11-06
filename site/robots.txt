@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://mahekara28.github.io/regra/sitemap.xml
