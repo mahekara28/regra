@@ -20,6 +20,15 @@ test('HTTP flow: session checks, actual verification, durable history and export
     const body = JSON.stringify({ spec: example.spec, before: example.before, after: example.after });
     const noToken = await fetch(base + '/api/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
     assert.equal(noToken.status, 403);
+    const folderHeaders = { 'Content-Type': 'application/json', 'X-Regra-Token': initial.token };
+    const noFolderToken = await fetch(base + '/api/project-folder', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ root: directory }) });
+    assert.equal(noFolderToken.status, 403);
+    const folder = await fetch(base + '/api/project-folder', { method: 'POST', headers: folderHeaders, body: JSON.stringify({ root: directory }) });
+    assert.equal(folder.status, 200); assert.match((await folder.json()).message, /Folder found/);
+    const missingFolder = await fetch(base + '/api/project-folder', { method: 'POST', headers: folderHeaders, body: JSON.stringify({ root: path.join(directory, 'missing') }) });
+    assert.equal(missingFolder.status, 400); assert.match((await missingFolder.json()).error, /does not exist/);
+    const relativeFolder = await fetch(base + '/api/project-folder', { method: 'POST', headers: folderHeaders, body: JSON.stringify({ root: '.' }) });
+    assert.equal(relativeFolder.status, 400);
     const crossOrigin = await fetch(base + '/api/state', { headers: { Origin: 'https://unrelated.example' } });
     assert.equal(crossOrigin.status, 403);
     const wrongHostStatus = await new Promise((resolve, reject) => {

@@ -2,6 +2,8 @@
 const $ = selector => document.querySelector(selector);
 let state = { lessons: [], runs: [], examples: [] };
 let example = null, activeView = 'workbench', currentRun = null, busy = false, revision = 0, modelListing = null;
+let connectionInfo = null;
+let folderCheckRevision = 0;
 const fields = ['project', 'entry', 'title', 'args', 'expect', 'expect-mode', 'checks', 'before', 'after'];
 const esc = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const time = value => new Date(value).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
@@ -18,11 +20,12 @@ function download(name, value) {
   const link = document.createElement('a'); link.href = url; link.download = name; document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 function switchView(view) {
-  if (!['workbench', 'lessons', 'history', 'guide'].includes(view)) view = 'workbench';
+  if (!['workbench', 'lessons', 'history', 'connections', 'guide'].includes(view)) view = 'workbench';
   activeView = view;
   document.querySelectorAll('.view').forEach(item => { item.hidden = item.id !== `view-${view}`; });
   document.querySelectorAll('.nav').forEach(item => { item.classList.toggle('active', item.dataset.view === view); item.setAttribute('aria-current', item.dataset.view === view ? 'page' : 'false'); });
-  $('#page-name').textContent = { workbench: 'Workbench', lessons: 'Lesson library', history: 'Run history', guide: 'Field guide' }[view];
+  $('#page-name').textContent = { workbench: 'Workbench', lessons: 'Lesson library', history: 'Run history', connections: 'Connections', guide: 'Field guide' }[view];
+  if (view === 'connections' && !connectionInfo) loadConnections();
   if (location.hash !== `#${view}`) history.replaceState(null, '', `#${view}`);
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
@@ -98,6 +101,60 @@ function renderLessons() {
 function renderHistory() {
   $('#history-list').innerHTML = state.runs.length ? [...state.runs].reverse().map(r => `<button class="history-row" data-run="${esc(r.id)}"><span><strong>${esc(r.spec.title)}</strong><small>${esc(r.spec.project)} · ${esc(time(r.createdAt))}</small></span><span class="history-status ${r.status}">${esc(r.status.toUpperCase())} ↗</span></button>`).join('') : '<div class="empty"><div class="empty-icon">↺</div><h3>No runs yet.</h3><p>Verify a fix in the workbench to start an evidence trail.</p><button class="soft-button" data-view="workbench">Try the guided example →</button></div>';
 }
+function renderConnectionCommands() {
+  if (!connectionInfo) return;
+  const powershell = $('#connection-shell').value === 'powershell';
+  const quote = value => powershell ? "'" + value.replaceAll("'", "''") + "'" : "'" + value.replaceAll("'", "'\\''") + "'";
+  const root = $('#connection-root').value.trim();
+  const cli = `node ${quote(connectionInfo.cli)}`;
+  const client = $('#connection-client').value;
+  $('#connection-commands').textContent = `${cli} init --root ${quote(root)}\n\n${cli} connect --client ${client} --root ${quote(root)}\n\n${cli} doctor --root ${quote(root)}`;
+  const info = connectionInfo.clients.find(c => c.id === client);
+  $('#connection-note').textContent = `${info.label} uses ${info.file}. These commands configure the selected folder. To add the teaching case during initialization, add --demo to the first command.`;
+  if (!root) $('#connection-commands').textContent = 'Choose an existing project folder above to generate commands.';
+}
+async function checkConnectionFolder() {
+  const revision = ++folderCheckRevision;
+  const input = $('#connection-root');
+  const status = $('#connection-folder-status');
+  status.textContent = 'Checking the folder…';
+  try {
+    const result = await api('/api/project-folder', { root: input.value.trim() });
+    if (revision !== folderCheckRevision) return false;
+    input.setAttribute('aria-invalid', 'false');
+    status.textContent = result.message;
+    return true;
+  } catch (error) {
+    if (revision !== folderCheckRevision) return false;
+    input.setAttribute('aria-invalid', 'true');
+    status.textContent = error.message;
+    return false;
+  }
+}
+async function loadConnections() {
+  try {
+    const selectedRoot = $('#connection-root').value;
+    connectionInfo = await api('/api/connections');
+    if (!selectedRoot) $('#connection-root').value = connectionInfo.root;
+    renderConnectionCommands();
+    $('#connection-status').innerHTML = connectionInfo.setupMessage ? `<p class="connection-note">This dashboard project: ${esc(connectionInfo.setupMessage)}</p>` : `<p class="connection-note">Configuration status for ${esc(connectionInfo.root)}</p><div class="connection-badges">${connectionInfo.configured.map(c => `<span class="pill">${esc(c.label)}: ${esc(c.status)}</span>`).join('')}</div>`;
+  } catch (error) { $('#connection-note').textContent = `Connection details could not load: ${error.message}. Restart REGRA after updating its source.`; }
+}
+$('#connection-client').onchange = renderConnectionCommands;
+$('#connection-root').oninput = () => {
+  folderCheckRevision++;
+  $('#connection-root').removeAttribute('aria-invalid');
+  $('#connection-folder-status').textContent = 'Select a folder that already exists on this computer. Check it before running setup.';
+  renderConnectionCommands();
+};
+$('#check-connection-folder').onclick = checkConnectionFolder;
+$('#connection-shell').onchange = renderConnectionCommands;
+$('#refresh-connections').onclick = loadConnections;
+$('#copy-connection').onclick = async () => {
+  if (!await checkConnectionFolder()) return;
+  try { await navigator.clipboard.writeText($('#connection-commands').textContent); $('#copy-connection').textContent = 'Copied'; setTimeout(() => { $('#copy-connection').textContent = 'Copy commands'; }, 1800); }
+  catch { notice('Clipboard access was unavailable. Select the commands and copy them manually.'); }
+};
 document.addEventListener('click', event => {
   const nav = event.target.closest('[data-view]'); if (nav) switchView(nav.dataset.view);
   const exampleButton = event.target.closest('[data-example]'); if (exampleButton && !busy) loadExample(state.examples.find(e => e.id === exampleButton.dataset.example));

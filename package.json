@@ -1,14 +1,33 @@
 {
-  "name": "regra-local-prototype",
-  "version": "0.1.0",
-  "private": true,
+  "name": "@mahekara28/regra",
+  "version": "0.2.0-beta.1",
   "type": "module",
-  "description": "Turn reproducible bugs into executable lessons. Local app and CLI.",
+  "description": "Executable memory for coding agents: verification library, MCP server, CLI and local evidence dashboard.",
+  "author": "Mahek Ara",
+  "repository": { "type": "git", "url": "https://github.com/mahekara28/regra.git" },
+  "bugs": { "url": "https://github.com/mahekara28/regra/issues" },
+  "homepage": "https://github.com/mahekara28/regra#readme",
+  "keywords": ["ai-agents", "mcp", "regression-testing", "verification", "cli", "agent-memory"],
+  "publishConfig": { "access": "public", "tag": "beta" },
+  "bin": { "regra": "src/cli.mjs" },
+  "exports": { ".": { "types": "./src/index.d.ts", "import": "./src/index.mjs" } },
+  "types": "./src/index.d.ts",
+  "files": ["src/", "public/", "docs/", "examples/*.case.json", "examples/average.*.js", "examples/library.mjs", "LICENSE"],
   "engines": { "node": ">=22.13.0" },
   "scripts": {
     "start": "node src/server.mjs",
     "test": "node --test tests/*.test.mjs",
-    "demo": "node src/cli.mjs demo"
+    "demo": "node src/cli.mjs demo",
+    "typecheck": "tsc -p tsconfig.types.json",
+    "test:package": "node scripts/package-smoke.mjs"
   },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.4.0",
+    "@modelcontextprotocol/client": "2.4.0",
+    "jsonc-parser": "3.3.1",
+    "smol-toml": "1.9.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": { "typescript": "5.9.3", "@types/node": "24.10.0" },
   "license": "MIT"
 }

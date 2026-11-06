@@ -6,6 +6,7 @@ import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { Store } from './store.mjs';
 import { examples } from './examples.mjs';
 import { localModels, suggest } from './ollama.mjs';
+import { VERSION } from './version.mjs';
 
 const publicDir = fileURLToPath(new URL('../public/', import.meta.url));
 const assets = new Map([['/', ['index.html', 'text/html; charset=utf-8']], ['/app.js', ['app.js', 'text/javascript; charset=utf-8']], ['/style.css', ['style.css', 'text/css; charset=utf-8']]]);
@@ -19,7 +20,7 @@ async function body(req) {
   }
   try { return JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { throw new Error('Request must contain valid JSON.'); }
 }
-export function createApp({ directory = path.resolve('.regra') } = {}) {
+export function createApp({ directory = path.resolve('.regra'), root = process.cwd() } = {}) {
   const store = new Store(directory);
   const token = randomBytes(32).toString('hex');
   let aiBusy = false;
@@ -41,7 +42,13 @@ export function createApp({ directory = path.resolve('.regra') } = {}) {
         res.writeHead(200, { 'Content-Type': mime }); res.end(await readFile(path.join(publicDir, file))); return;
       }
       if (req.method === 'GET' && route === '/api/state') {
-        json(res, 200, { ...(await store.read()), examples, token, version: '0.1.0' }); return;
+        json(res, 200, { ...(await store.read()), examples, token, version: VERSION }); return;
+      }
+      if (req.method === 'GET' && route === '/api/connections') {
+        const { connections, CLIENTS } = await import('./connections.mjs');
+        let configured = [], setupMessage = '';
+        try { configured = await connections(root); } catch (error) { setupMessage = error.message; }
+        json(res, 200, { version: VERSION, root: path.resolve(root), cli: fileURLToPath(new URL('./cli.mjs', import.meta.url)), clients: Object.entries(CLIENTS).map(([id, c]) => ({ id, label: c.label, file: c.file })), configured, setupMessage, published: false }); return;
       }
       if (req.method === 'GET' && route === '/api/models') { json(res, 200, await localModels()); return; }
       if (req.method === 'GET' && route === '/api/export') {
@@ -53,6 +60,12 @@ export function createApp({ directory = path.resolve('.regra') } = {}) {
         if (!/^[a-f0-9]{64}$/.test(supplied) || !timingSafeEqual(Buffer.from(supplied), Buffer.from(token))) { json(res, 403, { error: 'Session expired. Refresh the page.' }); return; }
         if (!String(req.headers['content-type']).startsWith('application/json')) { json(res, 415, { error: 'Send application/json.' }); return; }
         const input = await body(req);
+        if (route === '/api/project-folder') {
+          if (typeof input?.root !== 'string' || !input.root.trim() || input.root.length > 4096 || !path.isAbsolute(input.root.trim())) throw new Error('Enter the full path to an existing project folder.');
+          const { projectRoot } = await import('./files.mjs');
+          const selected = await projectRoot(input.root.trim());
+          json(res, 200, { root: selected, message: 'Folder found. You can run the setup commands below.' }); return;
+        }
         if (route === '/api/verify') { json(res, 200, await store.verify(input)); return; }
         if (route === '/api/suggest') {
           if (aiBusy) { json(res, 409, { error: 'A local AI draft is already running.' }); return; }
@@ -72,8 +85,8 @@ export function createApp({ directory = path.resolve('.regra') } = {}) {
   server.headersTimeout = 15000;
   return server;
 }
-export async function startServer({ port = Number(process.env.PORT || 4317), directory = process.env.REGRA_DATA || path.resolve('.regra') } = {}) {
-  const server = createApp({ directory });
+export async function startServer({ port = Number(process.env.PORT || 4317), directory = process.env.REGRA_DATA || path.resolve('.regra'), root = process.cwd() } = {}) {
+  const server = createApp({ directory, root });
   await new Promise((resolve, reject) => { server.once('error', reject); server.listen(port, '127.0.0.1', resolve); });
   console.log(`REGRA · Every fix earns its proof.\nOpen http://127.0.0.1:${server.address().port}\nLessons: ${path.resolve(directory)}\nKeep this terminal open. Press Ctrl+C to stop.`);
   return server;

@@ -2,139 +2,170 @@
 
 **Every fix earns its proof.**
 
-REGRA turns a reproducible coding mistake into a test that protects future changes. It is a local app for learning and inspecting fixes, with a command-line engine underneath. This is a working v0.1 prototype, not a hosted service.
+Executable memory for coding agents. A reproducible bug becomes a test; a proposed fix must pass it and preserve earlier behavior. Verified lessons stay available across agent sessions.
 
-## Start in two minutes
+Use REGRA as a **JavaScript/TypeScript library**, **local MCP server**, **CLI**, or **browser dashboard**. All four share one verification engine and evidence store. REGRA does not retrain models.
 
-You need **Node.js 22.13 or later**. There are no npm dependencies to install.
+> **Release status:** this checkout contains `0.2.0-beta.1`, not yet published to npm. Use the local installation below. GitHub installation requires pushing these changes first; registry installation requires a separate npm release.
 
-On Windows, double-click **Start-Regra.cmd**. Or open a terminal in this folder and run:
+## Connect an agent
+
+Requires **Node.js 22.13+**. From this updated REGRA checkout, install once:
 
 ```sh
-npm start
+npm ci
+npm install -g .
 ```
 
-Open **http://127.0.0.1:4317**. Keep the terminal open while using the app.
+Then open a terminal in the project you want to protect:
 
-1. Choose **An empty list**. The function crashes for `average([])`.
-2. Click **Try a broken fix**, then **Verify this fix**. It stops the crash but breaks normal calculations, so REGRA rejects it.
-3. Click **Load example fix**, then verify again. The test fails before the fix, passes afterward, and existing behavior remains intact.
-4. Open **Lesson library**. The verified behavior is now recorded on disk.
-5. Try another change with the same project key and function name. Those lessons run again automatically.
+```sh
+regra init --root . --demo
+regra connect --client cursor --root .
+regra doctor --root .
+```
 
-The examples contain deliberately chosen product rules. For example, an empty average returns zero in the demo; that is not a universal mathematical definition. Review the expected behavior for your own app.
+Replace `cursor` with **`claude`**, **`codex`**, or **`vscode`**. `--demo` adds a teaching case and example functions; omit it for an empty setup. `--project my-app` sets an explicit project key at initialization.
 
-## What works today
+Restart the agent in that project and accept its normal MCP/trust prompt. Ask:
 
-- A responsive local app with three guided examples and editable custom functions.
-- Real execution of original and proposed code; no simulated test results.
-- A regression gate: a fix that breaks a recorded behavior is rejected.
-- Three repeated runs per case and per version, with a fresh execution context for each case.
-- Separate statuses: **verified**, **rejected**, and **inconclusive**.
-- Persistent lessons, run history, source fingerprints, runtime version, observed outputs, and JSON exports.
-- Optional AI repair drafts from installed **local** Ollama models. Drafts never skip verification.
-- A CLI for verification, regression checks, JSON results, and context for other coding assistants.
-- No account, API key, cloud storage, telemetry, or runtime package dependencies.
+> Call regra_status and regra_context. Inspect the average case and its expected behavior. Verify the original and fixed functions in regra-examples using the caseFile and caseHash returned by context. Show me the result and proof ID.
 
-## What the first version supports
+The agent starts REGRA over stdio. **No dashboard server, API key, model download, or Ollama installation is needed for MCP.** Your agent supplies its own model.
 
-Self-contained, **synchronous JavaScript functions**, written as plain function declarations:
+To try setup in this REGRA checkout without a global install, run from the REGRA folder. The dot means your current folder:
+
+```powershell
+node src/cli.mjs init --root . --demo
+node src/cli.mjs connect --client codex --root .
+node src/cli.mjs doctor --root .
+```
+
+For another project, replace the dot with that project's existing folder path in quotes. REGRA adds its files inside an existing project; it does not create a new project directory. The dashboard's **Connections** page checks the folder and generates commands with absolute paths. See [connection guide](docs/CONNECTIONS.md).
+
+## Import the library
+
+Install this checkout in another Node project:
+
+```sh
+npm install --save-dev /absolute/path/to/regra
+```
+
+After the updated code is pushed, users can install directly from GitHub:
+
+```sh
+npm install --save-dev github:mahekara28/regra
+```
 
 ```js
-function average(values) {
-  if (values.length === 0) return 0;
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
+import { createRegra } from '@mahekara28/regra';
+
+const regra = createRegra({ project: 'my-app', directory: '.regra' });
+const proof = await regra.verify({
+  spec: {
+    entry: 'average', title: 'Empty input returns zero',
+    repro: { name: 'Empty', args: [[]], expect: 0 },
+    checks: [{ name: 'Numbers', args: [[2, 4]], expect: 3 }]
+  },
+  before: 'function average(xs) { return xs.reduce((a,b) => a+b) / xs.length; }',
+  after: 'function average(xs) { return xs.length ? xs.reduce((a,b) => a+b, 0) / xs.length : 0; }'
+});
+
+if (proof.status !== 'verified') {
+  // Return the failing evidence to your agent for another repair.
 }
+const lessons = await regra.context({ entry: 'average' });
 ```
 
-Inputs and returned values must be JSON-compatible. Tests can also expect a named thrown error such as `TypeError`. No imports, exports, package dependencies, browser APIs, asynchronous code, dates, undefined, NaN, or cyclic objects. Results use exact equality, including floating-point numbers.
+TypeScript declarations ship with the package. Imports start no server and write no files. The engine needs no model. See [API reference](docs/API.md) and [runnable example](examples/library.mjs).
 
-It does **not** yet connect to entire repositories, retrain models, run browser tests, create pull requests, or automatically apply fixes. The example fixes are labeled teaching examples; only **Ask local AI** calls a model.
+## Agent tools
 
-## Use the CLI
+| MCP tool | Purpose |
+| --- | --- |
+| `regra_status` | Identify the scoped project, runtime and evidence counts |
+| `regra_context` | Retrieve lessons and case files with contract fingerprints |
+| `regra_verify` | Check original/proposed code against an existing case; retain proof and verified lessons |
+| `regra_check` | Replay a contract and saved lessons against current code |
+| `regra_evidence` | Retrieve the exact recorded proof by ID |
 
-Run these commands from this folder. All examples below are single-line commands and work in PowerShell or Bash.
+There is also a project status resource and a `repair_with_regra` prompt. Compatibility is tested with the current official SDK and a 2025-era initialize exchange.
+
+**MCP makes tools available; it does not force an agent to use them.** For enforcement, run the CLI check in CI and require that check in repository settings. REGRA does not apply patches, merge, or push code.
+
+## Verification rules
+
+All five gates must pass: reproduce the failure on the original; confirm existing checks pass before the change; pass the new case after the change; preserve existing checks and saved lessons; and obtain consistent pass/fail results on three runs with no setup errors.
+
+A syntax error, missing function, timeout, unsupported result or non-reproducing case is **inconclusive**. A repair that fails behavior checks is **rejected**. Only a **verified** before/after result creates a lesson.
+
+MCP verification requires a file in `regra-cases/` and its `caseHash` from context. A changed contract or inline replacement expectation is refused. The hash detects changed data; it does not establish human review. A person must review intended behavior, and an agent with other filesystem tools still has the access its host grants.
+
+## Current scope
+
+Reviewed, self-contained **synchronous JavaScript function declarations**, with JSON inputs/results or named thrown errors. No imports, exports, browser APIs, promises, package dependencies, dates, undefined, non-finite numbers, or cyclic results. Equality is exact, including floating-point numbers.
+
+`args: [[]]` means one empty-list argument. `expect: 0` requires a zero result; use `throws: "TypeError"` instead for an expected error. Returning zero for an empty average is a chosen demo rule, not a universal mathematical definition.
+
+**Whole-repository test execution, Python, browser tests, and arbitrary shell commands are not implemented.** Three repeated runs sample repeatability; tests cover only their recorded behavior.
+
+## Dashboard and CLI
+
+From the clone: `npm start`, or double-click `Start-Regra.cmd` on Windows after installing dependencies. From an installed package:
 
 ```sh
-node src/cli.mjs demo
-node src/cli.mjs verify --case examples/average.case.json --before examples/average.before.js --after examples/average.fixed.js
-node src/cli.mjs verify --case examples/average.case.json --before examples/average.before.js --after examples/average.broken.js
-node src/cli.mjs check --case examples/average.case.json --source examples/average.fixed.js
-node src/cli.mjs lessons --json
-node src/cli.mjs context --project demo-analytics
+regra ui --root /path/to/project
 ```
 
-The broken example intentionally exits with code 1. Exit codes are **0** for passed/success, **1** for rejected or inconclusive, and **2** for setup errors. Add `--json` to verification or checks for machine-readable evidence. Use `--store PATH` to separate lesson libraries between projects.
+Open **http://127.0.0.1:4317**. Compare a prepared bad fix and correct fix, inspect lessons, and use Connections for setup. Optional AI drafts use installed local Ollama models and never bypass verification.
 
-`check` always includes the provided case file, even on a new machine with no history. Commit reviewed case files to your own repository and run this command in your existing CI to enforce those behaviors. Native `.js` test-runner adapters are a later milestone.
-
-A case file has this shape:
-
-```json
-{
-  "project": "my-app",
-  "entry": "average",
-  "title": "An empty list returns zero",
-  "repro": { "name": "Empty list", "args": [[]], "expect": 0 },
-  "checks": [
-    { "name": "Positive values", "args": [[2, 4]], "expect": 3 }
-  ]
-}
+```sh
+regra connect --client claude --root . --dry-run
+regra connections --root .
+regra disconnect --client claude --root .
+regra verify --root . --case regra-cases/average.case.json --before regra-examples/average.before.js --after regra-examples/average.fixed.js
+regra check --root . --case regra-cases/average.case.json --source regra-examples/average.fixed.js
+regra lessons --json
+regra context --project my-app
 ```
 
-`args` is the array of arguments passed to the function. If the function takes one list, wrap that list: `[[]]` calls `average([])`. To expect an error, replace `"expect": 0` with `"throws": "TypeError"`.
+From the clone, replace `regra` with `node src/cli.mjs`. `--root` sets relative paths and default evidence storage. Standalone CLI commands also accept `--store PATH`; MCP uses its initialized project's store. Exit codes: **0** passed/success, **1** rejected/inconclusive or failed doctor, **2** setup error. Add `--json` for structured results. `check` uses the provided case even on a fresh machine without history.
 
-## Optional local AI
+## Connections, storage and cost
 
-Install Ollama and download a suitable local model if you do not have one. Start Ollama before opening REGRA, or refresh REGRA after Ollama starts. Select an installed model and choose **Ask local AI**. The code and test contract are sent to `127.0.0.1:11434`; there is no hosted provider fallback.
+Connection setup preserves other settings and JSON comments, refuses conflicts, and removes only its managed entry on disconnect. It changes project-local configuration, not global settings. Entries contain absolute paths for this machine; keep the installed package in place and reconnect if it moves. Each teammate runs setup locally. Doctor checks the protocol but does not observe whether an editor loaded REGRA.
 
-REGRA rejects models marked as cloud/remote. Model generation may take up to two minutes, and small models will sometimes produce bad repairs. That is why the verification gate is independent of the model.
+| File | Purpose |
+| --- | --- |
+| `regra.config.json` | Project identity; commit it |
+| `regra-cases/*.case.json` | Reviewed contracts; commit after reviewing their data |
+| `REGRA.md` | Short agent workflow guide |
+| `.regra/state.json` | Code, inputs, results and lessons; ignored by Git |
+| `.regra/connections.json` | Machine-specific managed entry records; ignored by Git |
 
-Using local models removes per-request API fees; you still supply the computer, electricity, storage, and initial model download. The core workflow works without Ollama. Nothing in this project requires buying a coding assistant subscription.
+No REGRA account, hosted database, paid API or subscription is required. Execution uses your computer. A connected coding agent keeps its existing account/provider costs; Ollama is optional.
 
-## What counts as verified
+Evidence uses locked, atomic writes. Corrupt history is preserved and reported. If a crash leaves `write.lock` or `connections.lock` under `.regra`, stop all REGRA processes using the project before removing only the stale lock. History is not automatically pruned. Review source and inputs before exporting.
 
-All five gates must pass:
+The runner uses a child process, fresh VM contexts, Node permissions and resource limits. **These are not a security sandbox for hostile code.** Use reviewed code locally; an OS/container boundary is needed before public or untrusted repository execution. MCP paths reject traversal and symlinks, while the local owner still controls files on disk.
 
-1. The new bug test fails on the original code in all three runs.
-2. User-supplied existing-behavior checks pass on the original code.
-3. The new test passes on the proposed fix in all three runs.
-4. All existing checks and saved lessons pass on the proposed fix.
-5. Repeated pass/fail outcomes agree and no runner/setup error occurs.
+## With Context Relay
 
-Syntax errors, missing functions, non-JSON results, and timeouts do not count as proof of the reported bug. A test that already passes on the original code is inconclusive. A changed expectation that conflicts with a saved lesson is rejected before execution; intentional behavior changes need a reviewed new contract (use a new project key in v0.1).
-
-This is sampled evidence for the recorded inputs, not a proof of complete correctness. Three runs can catch some flaky tests but cannot establish determinism. The system improves the workflow's memory; the model's weights do not change.
-
-## Storage and privacy
-
-The app and CLI use `.regra/state.json` in the working directory. It contains **code, test inputs, expected outputs, and results**. It is ignored by Git by default; review it before sharing. Export only the lessons or test cases you want to share. There is no automatic upload or community database.
-
-Writes use a lock and an atomic file replacement. A rejected fix creates a run record but no lesson. Repeated verification deduplicates the lesson and retains new verified checks. Corrupt state is reported rather than overwritten. Run history is not automatically pruned in this prototype.
-
-If a crash leaves `.regra/write.lock`, first stop all REGRA app/CLI processes, then remove only that lock file and restart. Do not remove it while verification is running. Copy the data directory for a backup.
-
-## Execution boundary
-
-Run code you have reviewed on a machine you control. The runner uses a child process, Node permissions, a clean environment, fresh VM contexts, timeouts, and output/memory limits. **These are not a security sandbox for hostile code.** Do not expose this prototype as a public code-execution service. An OS/container execution boundary is required before supporting untrusted repository code or public submissions.
-
-The web service binds only to loopback, checks the Host/Origin, and requires a session token for writes. It does not provide a general filesystem or shell-command endpoint.
+[Context Relay](https://github.com/mahekara28/context-relay) carries reviewed working context between sessions. REGRA contributes executable checks and proof IDs. Include those references in a handoff so the next agent can retrieve evidence. No automatic cross-application delivery is implemented, and neither project depends on the other.
 
 ## Development
 
 ```sh
+npm ci
 npm test
+npm run typecheck
+npm run test:package
 ```
 
-- `src/core.mjs`: contract validation, execution orchestration, gates, lesson matching.
-- `src/runner.cjs`: repeated function execution in a restricted child process.
-- `src/store.mjs`: persistence and write locking.
-- `src/server.mjs`: loopback HTTP service.
-- `src/ollama.mjs`: optional local AI draft provider.
-- `src/cli.mjs`: developer commands and CI exit codes.
-- `public/`: interface with no build step or external assets.
-- `tests/`: verification, persistence, regressions and HTTP checks.
-- `docs/PRODUCT.md`: product direction and next milestones.
-- `docs/VALIDATION.md`: what was actually tested and its limits.
+The package smoke check packs, installs into a fresh consumer using the npm cache, imports the API, checks TypeScript declarations, runs the CLI, and performs real MCP discovery. Run `npm ci` first to populate the cache.
 
-REGRA is the working product name. No package, domain, or trademark registration has been made.
+The GitHub Actions workflow runs these checks on Windows and Linux with Node 22 and 24 when you push. Local validation results and remaining platform limits are recorded in [Validation](docs/VALIDATION.md).
+
+[API](docs/API.md) · [Connections](docs/CONNECTIONS.md) · [Product direction](docs/PRODUCT.md) · [Validation](docs/VALIDATION.md) · [Release steps](docs/RELEASING.md)
+
+MIT licensed. Preparing this release does not publish it or register a domain/trademark.

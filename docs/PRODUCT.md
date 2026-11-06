@@ -33,14 +33,18 @@ This builds on regression testing, test-driven development, and automated repair
 2. **Tests that cannot disappear during a repair.** Keep the approved behavior contract outside the proposed code. The prototype separates JSON expectations from snippets and blocks conflicting historical expectations. Repository adapters will also need to reject deleted, skipped, or weakened tests and verify the evaluator itself.
 3. **An honest uncertainty state.** “Could not verify” for broken environments, timeouts, inconsistent runs, missing tests or ambiguous requirements. Never turn those into a green pass.
 4. **Lessons that return at the right time.** Start with project and function identity. Add file paths, stack signatures, language and tags before adding embedding search. Exact matches are cheap, explainable, and useful.
-5. **Agent-independent context.** A concise behavior contract can be handed to any coding assistant. CLI context export works now; dedicated editor and protocol adapters come later. Changing models should not erase the test library.
+5. **Agent-independent context.** A concise behavior contract can be handed to any coding assistant. The npm library and MCP server now share the same engine, cases and evidence. Project setup supports Cursor, Claude Code, Codex and VS Code configuration formats. Changing models should not erase the test library.
 6. **Failure minimization.** Later, shrink a large failing input into a small reproducer and ask the user to confirm the intended output. Smaller cases are easier to understand and maintain.
 7. **Nearby edge cases.** Later, propose boundary cases such as empty, missing, duplicate, zero, maximum-length and Unicode inputs. Users confirm semantics before these become mandatory checks.
 8. **Local ownership and explicit sharing.** Keep source and failures local. Shared packs should initially be synthetic patterns and reviewed generic tests, not automatic uploads of proprietary source or production records.
 
-## First release: a narrow end-to-end slice
+## Delivered: library, MCP, CLI and optional app
 
-The delivered v0.1 implements local app + CLI, standalone synchronous JavaScript functions, three guided examples, user-defined tests, before/after execution, replay of lessons, persistence, evidence export, and optional local Ollama repair suggestions.
+The v0.2.0-beta.1 checkout adds a typed npm library, project-scoped MCP tools, reversible connection setup, a real protocol doctor and an optional connection guide in the dashboard. The v0.1 verification engine, lesson history, three guided examples and optional local Ollama drafts remain available. Publication to npm is a separate owner action.
+
+The everyday path is **install → init → connect → doctor**. After restarting the agent, users ask for `regra_status`, retrieve context and verify a proposed repair against an existing case. Configuration is distinct from a confirmed live agent connection. A rejected or inconclusive result never grants approval. A case fingerprint detects changed expectations between retrieval and verification; it does not prove a person reviewed them.
+
+The library is the reusable product core. MCP is the standard agent connection. The dashboard makes results and setup easier to understand without becoming a required service. There is no hosted account or paid provider dependency.
 
 It deliberately has no model training, vector database, user accounts, billing, multi-language runners, automatic deployment, browser extension, or team cloud service. Those would add maintenance and cost before the central workflow is proven.
 
@@ -50,10 +54,11 @@ The next usability improvement should replace the custom JSON test editor with a
 
 | Stage | Deliverable | Ready when |
 | --- | --- | --- |
-| 0.1: prove the loop | This local prototype | A broken fix is rejected, a correct fix is accepted, and a later regression is blocked after restart |
-| 0.2: real repositories | Node test-runner adapter, Git revision snapshots, reviewed test contract, isolated execution | A real project's bug can be reproduced and fixed without changing the checkout or weakening tests |
-| 0.3: daily workflow | CI command, editor entry point, relevant lesson suggestions, one-click evidence report | Developers can run verification in their current workflow with little setup; CI fails closed on missing/failed checks |
-| 0.4: expand | Python/pytest, browser reproduction with Playwright, intent-aware test migrations | Each adapter passes an identical conformance suite and distinguishes application failure from infrastructure failure |
+| 0.1: prove the loop (delivered) | Local app and CLI | A broken fix is rejected, a correct fix is accepted, and a later regression is blocked after restart |
+| 0.2: connect (implemented, unpublished beta) | npm library, MCP server, setup commands, doctor, connection screen | A fresh package consumer imports the API, starts MCP and retrieves real verification evidence |
+| Next: real repositories | Node test-runner adapter, Git revision snapshots, reviewed test contract, isolated execution | A real project's bug can be reproduced and fixed without weakening tests or running unreviewed commands on the host |
+| Then: smoother workflow | Visual test editor, relevant case suggestions, CI evidence reports | Developers maintain reviewed checks with little setup; required CI fails closed on missing or failed checks |
+| Later: expand | Python/pytest, browser reproduction with Playwright, intent-aware test migrations | Each adapter passes an identical conformance suite and distinguishes application failure from infrastructure failure |
 | Later: share carefully | Versioned public failure-pattern packs and optional team service | Provenance, secret review, version compatibility, trust boundaries and moderation are explicit |
 
 For repository support, reproduce baseline and candidate in disposable snapshots, pin dependencies/environment where practical, prevent agent writes to the evaluator, and record the exact executed revision. Review changes before applying or merging them. Do not label a host process or `vm` context a secure sandbox.
@@ -79,17 +84,17 @@ Do not advertise “bugs prevented” based only on saved test counts. Do not us
 | --- | --- | --- |
 | App + verification | Node.js, local files, plain browser UI | No service subscription or dependency fees; uses existing hardware |
 | AI drafting | Optional local Ollama model | No per-request API fee; download size, electricity, model license and hardware still matter |
-| Storage | Local JSON in v0.1; SQLite when history grows | No hosted database bill |
+| Storage | Local JSON in v0.2; SQLite when history grows | No hosted database bill |
 | Source + collaboration | Git; optional GitHub | Local Git is sufficient; hosted service limits apply |
 | CI | Existing local runner or standard GitHub Actions | Public repositories have free standard hosted runners; private usage has plan allowances |
-| Distribution | Source archive first | No domain or app-store purchase needed for local use |
+| Distribution | npm-compatible package, local source install; public npm release planned | No domain or app-store purchase needed for local use |
 
 Free to run locally does not mean unlimited free hosted compute. Avoid depending on a temporary free inference tier. A later hosted offering would need an explicit compute budget or user-funded execution.
 
 ## Technical shape
 
 ```text
-Local app / CLI / future editor adapter
+JavaScript/TypeScript library / MCP / CLI / local app
                   |
            verification engine
             /             \
@@ -102,6 +107,12 @@ Local app / CLI / future editor adapter
 ```
 
 The AI drafts code or test candidates. The deterministic engine evaluates the reviewed contract. Model adapters should stay replaceable and optional.
+
+## Relationship to Context Relay
+
+[Context Relay](https://github.com/mahekara28/context-relay) carries reviewed project context between sessions and agents. REGRA carries executable cases and the evidence behind a verification decision. Both use a reusable package, project-scoped setup, MCP and diagnostics.
+
+Keep them independently useful. A Context Relay handoff can refer to a REGRA proof ID and code fingerprint, but direct automatic exchange between the projects is not implemented. A later explicit adapter could include the case fingerprint, before/after fingerprints, result and proof location in a handoff. It should never turn a remembered success into fresh verification of different code.
 
 ## Name and language
 
