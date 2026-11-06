@@ -10,7 +10,7 @@ Use REGRA as a **JavaScript/TypeScript library**, **local MCP server**, **CLI**,
 
 ## Public demo website
 
-The turquoise/navy product website lives in [`site/`](site/). It includes three interactive browser examples, agent-specific setup commands, a library example, an actual workbench capture and documentation links. From this repository checkout:
+The public website lives in [`site/`](site/). Its wine, silver and lime palette frames an interactive 3D view of the original code, proposed patch and saved cases. Three working repair examples, inspectable contracts and copyable setup commands follow. Documentation and the local-workbench capture open on demand. From this repository checkout:
 
 ```sh
 npm run site:preview

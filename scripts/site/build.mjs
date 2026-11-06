@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 export const root = fileURLToPath(new URL('../../', import.meta.url));
 export const buildDirectory = path.join(root, '_site');
 export const publicFiles = Object.freeze([
-  'index.html', '404.html', 'styles.css', 'main.mjs', 'demo.mjs',
+  'index.html', '404.html', 'styles.css', 'main.mjs', 'demo.mjs', 'scene.mjs',
   'assets/regra.svg', 'assets/workbench.jpg', 'assets/social-card.png',
   'robots.txt', 'sitemap.xml'
 ]);

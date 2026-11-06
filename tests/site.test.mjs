@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
-import { examples, verifyPrepared, retainLesson, replayLesson, sourceOf } from '../site/demo.mjs';
+import { examples, verifyPrepared, retainLesson, replayLesson, sourceOf, contractOf } from '../site/demo.mjs';
 import { examples as engineExamples } from '../src/examples.mjs';
 import { execute, validateSpec } from '../src/core.mjs';
 import { buildSite, buildDirectory, publicFiles } from '../scripts/site/build.mjs';
@@ -35,6 +35,10 @@ test('browser example outcomes agree with the installed engine and its shipped c
   for (const example of examples) {
     const shipped = engineExamples.find(item => item.id === example.id);
     assert.ok(shipped);
+    const copiedContract = validateSpec(contractOf(example));
+    assert.equal(copiedContract.project, shipped.spec.project);
+    assert.equal(copiedContract.entry, shipped.spec.entry);
+    assert.deepEqual([copiedContract.repro, ...copiedContract.checks].map(({ args, expect }) => ({ args, expect })), example.cases.map(({ args, expect }) => ({ args, expect })));
     const spec = validateSpec(shipped.spec);
     const contract = [spec.repro, ...spec.checks];
     assert.deepEqual(example.cases.map(({ args, expect }) => ({ args, expect })), contract.map(({ args, expect }) => ({ args, expect })));

@@ -1,16 +1,16 @@
 // Prepared, trusted examples only. This browser demonstration never evaluates source text.
 export const examples = [
   {
-    id: 'empty-average', label: '01 / Empty input', entry: 'average', file: 'average.js',
+    id: 'empty-average', project: 'demo-analytics', label: 'Empty input', entry: 'average', file: 'average.js',
+    patches: { incomplete: 'Always return zero', correct: 'Handle empty input' },
     title: 'An empty list should return zero.',
-    description: 'An analytics helper works with numbers, but crashes when there are none. Can the repair preserve both behaviors?',
+    description: 'The average helper throws on an empty array. Expected behavior: return 0 and preserve calculations for nonempty arrays.',
     lesson: 'An empty list has an average of zero',
     before: function average(values) {
       return values.reduce((sum, value) => sum + value)
         / values.length;
     },
     incomplete: function average(values) {
-      // No crash. But no calculation, either.
       return 0;
     },
     correct: function average(values) {
@@ -27,9 +27,10 @@ export const examples = [
     ]
   },
   {
-    id: 'slug-spaces', label: '02 / Whitespace', entry: 'slugify', file: 'slugify.js',
+    id: 'slug-spaces', project: 'demo-content', label: 'URL spacing', entry: 'slugify', file: 'slugify.js',
+    patches: { incomplete: 'Return a fixed string', correct: 'Trim the input' },
     title: 'Surrounding spaces should stay out of a URL.',
-    description: 'A URL helper adds stray hyphens. Fix the extra spaces without losing normal word separators.',
+    description: 'Leading and trailing spaces produce extra hyphens. Expected behavior: trim those spaces and keep separators between words.',
     lesson: 'Trim whitespace before making a URL slug',
     before: function slugify(text) {
       return text.toLowerCase().replace(/\s+/g, '-');
@@ -48,9 +49,10 @@ export const examples = [
     ]
   },
   {
-    id: 'first-item', label: '03 / Missing result', entry: 'firstName', file: 'first-name.js',
+    id: 'first-item', project: 'demo-search', label: 'Missing result', entry: 'firstName', file: 'first-name.js',
+    patches: { incomplete: 'Always return null', correct: 'Check for a result' },
     title: 'No search results should mean no name.',
-    description: 'This helper assumes a result always exists. Handle an empty list while keeping the names that are actually there.',
+    description: 'Reading the first name throws when there are no results. Expected behavior: return null for an empty list and preserve existing names.',
     lesson: 'An empty result list returns null',
     before: function firstName(items) {
       return items[0].name;
@@ -72,6 +74,10 @@ export const examples = [
 ];
 
 export const REPEATS = 3;
+
+export function contractOf(example) {
+  return structuredClone({ project: example.project, entry: example.entry, title: example.lesson, repro: example.cases[0], checks: example.cases.slice(1) });
+}
 
 export function executePrepared(fn, cases) {
   return cases.map(test => {

@@ -1,6 +1,6 @@
 # Public website
 
-REGRA has a public introduction and playground, alongside its installed local dashboard. The website uses navy, turquoise, typography and a diagram of the verification loop. It has no runtime dependencies, remote fonts, analytics, model calls, or connections to a visitor's local services.
+REGRA has a public introduction and playground, alongside its installed local dashboard. The website uses deep wine, cool silver and lime, with a short introduction, a working repair demo and installation instructions. Its three CSS 3D layers represent the original code, proposed patch and saved lesson. Cell colors and counts come from the demo's actual results. Scope details and the local-dashboard capture open on demand. It has no runtime dependencies, remote fonts, analytics, model calls, or connections to a visitor's local services.
 
 ## Preview locally
 
@@ -21,6 +21,7 @@ Node.js 22.13+ is enough to build and preview the public website. `npm ci` is ne
 | `site/index.html` | Page content, navigation, metadata and fallback install instructions |
 | `site/styles.css` | Theme, layout, responsive rules and focus states |
 | `site/main.mjs` | Demo controls, install modes, client selectors and copy buttons |
+| `site/scene.mjs` | Result-driven 3D surfaces, layer control, pointer tilt and motion preferences |
 | `site/demo.mjs` | Prepared functions, case expectations, browser verification and replay |
 | `site/assets/` | REGRA mark, actual dashboard screenshot and social preview image |
 | `site/404.html` | Recovery links for missing Pages routes |
@@ -41,9 +42,11 @@ The three prepared examples are empty-input averaging, whitespace in a URL slug 
 4. Reintroduce the original function and observe the retained case catch it.
 5. Download the browser results, switch examples, or reset the entire demo.
 
-The actual prepared function bodies are invoked with fresh inputs; there is no `eval`, arbitrary source input or model-generated code. The displayed source comes from those functions. Demo lessons are scoped per example and kept only in page memory; reloading clears them. Downloaded JSON identifies itself as browser-demo data, not an installed-engine proof.
+The actual prepared function bodies are invoked with fresh inputs; there is no `eval`, arbitrary source input or model-generated code. The displayed source comes from those functions. The first example executes on page load using the same verification function as the Run checks button. Patch labels describe their changes, and the result reports the observed pass/fail count. Visitors can inspect and copy a valid REGRA case contract, including the project's expected inputs and outputs. Demo lessons are scoped per example and kept only in page memory; reloading clears them. Downloaded JSON identifies itself as browser-demo data, not an installed-engine proof.
 
 The installed engine has separate process execution, setup-error handling, project scoping and persistent evidence. The public example is deliberately limited to illustrating its behavior. Node tests compare the demo's case expectations and outcomes with the shipped examples and real engine.
+
+The visual supports a collapsed stack and separated layers. Pointer tilt is limited to a fine mouse pointer. Motion can be turned off, respects the operating system's reduced-motion preference, and pauses offscreen or when the document is hidden. Controls are hidden without JavaScript. The public page uses no WebGL or animation library; the installed dashboard retains its own theme.
 
 ## Installation content
 
@@ -72,8 +75,8 @@ From this project's current Windows folder:
 ```powershell
 cd "C:\Users\Mehek\Documents\Codex\2026-11-06\can-reject-a-solution-that-fails\outputs\regra"
 git status
-git add site scripts/site tests/site.test.mjs .github/workflows/pages.yml package.json .gitignore README.md docs/WEBSITE.md docs/VALIDATION.md
-git commit -m "Add REGRA public website and interactive playground"
+git add site scripts/site/build.mjs tests/site.test.mjs README.md docs/WEBSITE.md docs/VALIDATION.md
+git commit -m "Redesign REGRA website with interactive test layers"
 git push origin main
 ```
 
