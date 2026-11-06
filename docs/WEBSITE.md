@@ -79,6 +79,8 @@ git push origin main
 
 The workflow checks pull requests without deploying them. Matching pushes and manual runs on `main` upload only `_site/` and publish through the `github-pages` environment. No separate hosting account, personal access token or paid domain is required for this GitHub Pages address.
 
+If **Configure Pages** fails with `Get Pages site failed` or `HttpError: Not Found`, enable **GitHub Actions** as the publishing source in [REGRA's Pages settings](https://github.com/mahekara28/regra/settings/pages), then open [the website workflow](https://github.com/mahekara28/regra/actions/workflows/pages.yml) and rerun the failed jobs or use **Run workflow** on `main`. A successful commit or push alone does not enable Pages. A change only to the package smoke test or CI workflow does not trigger the website workflow, so use that manual rerun after changing the setting.
+
 The site uses relative asset URLs. Its canonical URL, social metadata, sitemap, robots file and 404 links target `/regra/`; update them together if moving to another repository name or domain.
 
 ## Validation
