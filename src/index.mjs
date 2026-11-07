@@ -4,6 +4,7 @@ import { verify as verifyCore, validateSpec, validateSource, validateCase, saved
 
 export { validateSpec };
 export const verify = verifyCore;
+export { inspectRepository, planRepository, verifyRepository, checkRepository, readRepositoryProof } from './repository/index.mjs';
 
 function projectKey(value) {
   if (typeof value !== 'string' || !/^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$/.test(value)) throw new Error('project must be a stable key of 1–80 letters, numbers, dots, dashes or underscores.');

@@ -41,3 +41,51 @@ export function createRegra(options: { project: string; directory?: string }): R
 export function verify(request: { spec: Spec; before: string; after: string; lessons?: Lesson[] }): Promise<Run>;
 export function validateSpec(value: unknown): Spec;
 export function summarizeRun(run: Run): RunSummary;
+
+export interface RepositoryIssue { code: string; detail: string; }
+export interface RepositoryRevision { ref: string; commit: string; tree: string; fileCount: number; }
+export interface RepositorySelection { root?: string; baseline: string; candidate?: string; }
+export interface RepositoryPlan {
+  kind: 'regra-repository-plan'; version: 1; root: string; adapter: 'node-test';
+  baseline: RepositoryRevision; candidate: RepositoryRevision; testScript: string | null;
+  testFiles: string[]; contractFiles: Array<{ path: string; oid: string; mode: string }>;
+  changedFiles: string[]; addedTestFiles: string[]; contractHash: string; planHash: string;
+  dependencyFingerprint: string; dependencies: string[]; hasLockfile: boolean;
+  dirty: boolean; warnings: string[]; blockers: RepositoryIssue[]; ready: boolean;
+  repeats: number; requiresTrust: true; scope: string;
+}
+export interface RepositoryInspection {
+  kind: 'regra-repository-inspection'; root: string; revision: RepositoryRevision; adapter: 'node-test';
+  packageName: string | null; testScript: string | null; testFiles: string[]; contractFiles: string[];
+  dependencies: string[]; hasLockfile: boolean; supported: boolean; blockers: RepositoryIssue[];
+  dirty: boolean; next: string; scope: string;
+}
+export interface RepositoryError { name?: string; code?: string; message: string; failureType?: string; actual?: string; expected?: string; operator?: string; cause: RepositoryError | null; }
+export interface RepositoryTestResult {
+  name: string; file: string | null; line: number | null; column: number | null; nesting: number;
+  type?: string; passed: boolean; skipped: boolean; todo: boolean; fileWrapper: boolean; error: RepositoryError | null;
+}
+export interface RepositoryTestRun {
+  repeat: number; results: RepositoryTestResult[];
+  summary?: { success: boolean; counts: { tests: number; passed: number; failed: number; skipped: number; todo: number; cancelled: number; suites: number; topLevel: number }; duration_ms: number } | null;
+  exitCode: number | null; signal: string | null; timedOut: boolean; outputLimit: boolean;
+  error: string | null; workerError?: RepositoryError | null; durationMs: number; stderr: string; log?: string; truncated?: boolean;
+}
+export interface RepositoryOptions extends RepositorySelection {
+  trusted: true; installDependencies?: boolean; timeoutMs?: number; expectedPlanHash?: string;
+  onProgress?: (progress: { side: 'before' | 'after'; repeat: number; repeats: number }) => void;
+}
+export interface RepositoryProof {
+  kind: 'regra-repository-proof'; version: 1; id: string; createdAt: string; completedAt: string;
+  mode: 'repair' | 'check'; status: VerificationStatus; canProceed: boolean; summary: string;
+  reason: RepositoryIssue; findings: RepositoryIssue[]; plan: RepositoryPlan; repeats: number;
+  beforeRuns: RepositoryTestRun[]; afterRuns: RepositoryTestRun[]; proofPath: string; scope: string;
+  environment: { node: string; git: string; npm: string | null; platform: string; arch: string; regra: string; workerHash: string; dependencyFingerprint: string; environmentPolicy: string };
+  execution: { executable: string; arguments: string[]; input: { files: string[] }; runnerOptions: { concurrency: number; isolation: 'process' }; timeoutMs: number; dependencyInstall: string[] | null };
+  installations: Array<{ side: string; repeat: number; exitCode: number | null; timedOut: boolean; durationMs: number; log: string }>;
+}
+export function inspectRepository(options?: { root?: string; revision?: string }): Promise<RepositoryInspection>;
+export function planRepository(options: RepositorySelection): Promise<RepositoryPlan>;
+export function verifyRepository(options: RepositoryOptions): Promise<RepositoryProof>;
+export function checkRepository(options: RepositoryOptions): Promise<RepositoryProof>;
+export function readRepositoryProof(options: { root?: string; id: string }): Promise<RepositoryProof>;
