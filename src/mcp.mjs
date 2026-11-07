@@ -5,6 +5,7 @@ import { openProject, listCases, loadCase } from './project.mjs';
 import { summarizeRun } from './index.mjs';
 import { hash } from './core.mjs';
 import { VERSION } from './version.mjs';
+import { inspectRepository, planRepository, readRepositoryProof } from './repository/index.mjs';
 
 const source = z.string().min(1).max(24000).describe('A reviewed, self-contained synchronous JavaScript function declaration. No imports or exports.');
 const caseFile = z.string().min(1).max(300).describe('An existing reviewed contract, relative to the project, such as regra-cases/average.case.json.');
@@ -58,6 +59,22 @@ export async function createMcpServer(root) {
     inputSchema: z.object({ runId: z.string().uuid() }).strict(), annotations: readOnly
   }, guarded(async ({ runId }) => regra.evidence(runId)));
   server.registerResource('regra-project', 'regra://project', { title: 'REGRA project status', mimeType: 'application/json' }, async uri => ({ contents: [{ uri: uri.href, mimeType: 'application/json', text: JSON.stringify(await regra.status()) }] }));
+  server.registerTool('regra_repository', {
+    title: 'Inspect repository verification',
+    description: 'Read-only Node project inspection, verification plan or repository proof summary. No repository code executes, dependencies install, or settings change. Preview the exact commits and contract before asking the user to run repo-verify or repo-check on trusted code.',
+    inputSchema: z.discriminatedUnion('action', [
+      z.object({ action: z.literal('inspect'), revision: z.string().min(1).max(200).optional() }).strict(),
+      z.object({ action: z.literal('plan'), baseline: z.string().min(1).max(200), candidate: z.string().min(1).max(200).optional() }).strict(),
+      z.object({ action: z.literal('evidence'), id: z.string().uuid() }).strict()
+    ]), annotations: readOnly
+  }, guarded(async args => {
+    if (args.action === 'evidence') {
+      const proof = await readRepositoryProof({ root: project.root, id: args.id });
+      return { id: proof.id, status: proof.status, canProceed: proof.canProceed, summary: proof.summary, mode: proof.mode, reason: proof.reason, baseline: proof.plan.baseline, candidate: proof.plan.candidate, contractHash: proof.plan.contractHash, proofPath: proof.proofPath, findings: proof.findings.slice(0, 20), failures: (proof.afterRuns.at(-1)?.results || []).filter(test => !test.passed).slice(0, 20), scope: proof.scope };
+    }
+    const report = args.action === 'inspect' ? await inspectRepository({ root: project.root, revision: args.revision }) : await planRepository({ root: project.root, baseline: args.baseline, candidate: args.candidate });
+    return { ...report, contractFiles: report.contractFiles.slice(0, 100), totalContractFiles: report.contractFiles.length, ...(report.changedFiles ? { changedFiles: report.changedFiles.slice(0, 100), totalChangedFiles: report.changedFiles.length } : {}), truncated: report.contractFiles.length > 100 || (report.changedFiles?.length ?? 0) > 100 };
+  }));
   server.registerPrompt('repair_with_regra', { title: 'Repair with executable lessons', description: 'A short workflow for checking a proposed function repair.', argsSchema: z.object({ functionName: z.string().max(80) }) }, ({ functionName }) => ({ messages: [{ role: 'user', content: { type: 'text', text: `Help repair function ${JSON.stringify(functionName)} in project ${JSON.stringify(project.config.project)}. First call regra_context, then inspect and review an existing case file. Preserve the original function before editing. Propose a repair and call regra_verify. Report the actual status and run ID, including any failed or inconclusive checks. Do not weaken expectations or claim correctness beyond the recorded cases.` } }] }));
   return server;
 }

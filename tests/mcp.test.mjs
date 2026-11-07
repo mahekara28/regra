@@ -22,8 +22,10 @@ test('real MCP client discovers tools and verifies, persists, checks and retriev
     await initProject({ root, project: 'mcp-test', demo: true });
     await client.connect(transport);
     const list = await client.listTools();
-    assert.deepEqual(list.tools.map(t => t.name).sort(), ['regra_status', 'regra_context', 'regra_verify', 'regra_check', 'regra_evidence'].sort());
+    assert.deepEqual(list.tools.map(t => t.name).sort(), ['regra_status', 'regra_context', 'regra_verify', 'regra_check', 'regra_evidence', 'regra_repository'].sort());
+    assert.equal(list.tools.find(tool => tool.name === 'regra_repository').annotations.readOnlyHint, true);
     const call = (name, args = {}) => client.callTool({ name, arguments: args });
+    assert.equal((await call('regra_repository', { action: 'execute', trusted: true })).isError, true);
     assert.equal((await call('regra_status')).structuredContent.project, 'mcp-test');
     const contract = (await call('regra_context', { entry: 'average' })).structuredContent.cases[0];
     assert.equal(contract.caseFile, 'regra-cases/average.case.json');
@@ -73,7 +75,7 @@ test('2025-era MCP initialize handshake and discovery remain compatible', async 
     const initialized = await request('initialize', { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'legacy-test', version: '1.0.0' } });
     assert.match(initialized.result.protocolVersion, /^2025-/);
     child.stdin.write(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' }) + '\n');
-    const listed = await request('tools/list', {}); assert.equal(listed.result.tools.length, 5);
+    const listed = await request('tools/list', {}); assert.equal(listed.result.tools.length, 6);
     const status = await request('tools/call', { name: 'regra_status', arguments: {} });
     assert.equal(status.result.structuredContent.project, 'legacy-test');
   } finally {

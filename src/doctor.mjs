@@ -17,7 +17,7 @@ export async function probeMcp(root) {
     const listing = await client.listTools();
     const response = await client.callTool({ name: 'regra_status', arguments: {} });
     if (response.isError) throw new Error('MCP status returned an error.');
-    const required = ['regra_status', 'regra_context', 'regra_verify', 'regra_check', 'regra_evidence'];
+    const required = ['regra_status', 'regra_context', 'regra_verify', 'regra_check', 'regra_evidence', 'regra_repository'];
     if (required.some(name => !listing.tools.some(tool => tool.name === name))) throw new Error('The MCP server is missing expected tools.');
     return { passed: true, tools: listing.tools.map(t => t.name), project: response.structuredContent?.project, message: 'Real stdio discovery and status call passed. This does not observe whether your editor loaded the server.' };
   } catch (error) { return { passed: false, message: error.message, stderr }; }
