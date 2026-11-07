@@ -1,8 +1,0 @@
-
-# BEGIN REGRA MANAGED MCP
-[mcp_servers.regra]
-command = "C:\\Program Files\\nodejs\\node.exe"
-args = ["C:\\Users\\Mehek\\Documents\\Codex\\2026-11-06\\can-reject-a-solution-that-fails\\outputs\\regra\\src\\cli.mjs","mcp","--root","C:\\Users\\Mehek\\Documents\\Codex\\2026-11-06\\can-reject-a-solution-that-fails\\outputs\\regra"]
-startup_timeout_sec = 20
-tool_timeout_sec = 60
-# END REGRA MANAGED MCP
