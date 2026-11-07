@@ -22,6 +22,20 @@ The website's prepared functions run in the browser; temporary demo lessons rese
 
 The deployment target is **https://mahekara28.github.io/regra/**. Publishing requires enabling GitHub Actions in the repository's Pages settings and pushing the website changes to `main`; adding these files alone does not make it live. See the [website and deployment guide](docs/WEBSITE.md).
 
+## Verify a real repository
+
+For the new real-project adapter, see [repository verification](docs/REPOSITORIES.md). It discovers committed Node tests, previews two Git revisions and runs the same frozen suite against both in disposable snapshots:
+
+```sh
+regra inspect --root .
+regra repo-verify --root . --baseline main --candidate HEAD --dry-run
+regra repo-verify --root . --baseline main --candidate HEAD --trusted
+```
+
+Use your actual broken/fixed Git refs. Execution requires reviewed, trusted code; snapshots are not a hostile-code sandbox. Add `--install-deps` only when you explicitly want lockfile-based dependency installation with lifecycle scripts disabled. `repo-check` provides a regression-only gate, and `regra_repository` lets an MCP agent inspect plans and proof summaries without executing repository code.
+
+The [implementation plan](docs/IMPLEMENTATION_PLAN.md) tracks the supplied roadmap: repository verification first, then durable repository lessons/CI automation, easier setup and bug-to-test forms. No paid API is required.
+
 ## Connect an agent
 
 Requires **Node.js 22.13+**. From this updated REGRA checkout, install once:
@@ -98,6 +112,7 @@ TypeScript declarations ship with the package. Imports start no server and write
 | MCP tool | Purpose |
 | --- | --- |
 | `regra_status` | Identify the scoped project, runtime and evidence counts |
+| `regra_repository` | Inspect committed Node tests, preview Git comparisons or read repository proof summaries; does not execute code |
 | `regra_context` | Retrieve lessons and case files with contract fingerprints |
 | `regra_verify` | Check original/proposed code against an existing case; retain proof and verified lessons |
 | `regra_check` | Replay a contract and saved lessons against current code |

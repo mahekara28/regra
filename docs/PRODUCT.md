@@ -56,12 +56,14 @@ The next usability improvement should replace the custom JSON test editor with a
 | --- | --- | --- |
 | 0.1: prove the loop (delivered) | Local app and CLI | A broken fix is rejected, a correct fix is accepted, and a later regression is blocked after restart |
 | 0.2: connect (implemented, unpublished beta) | npm library, MCP server, setup commands, doctor, connection screen | A fresh package consumer imports the API, starts MCP and retrieves real verification evidence |
-| Next: real repositories | Node test-runner adapter, Git revision snapshots, reviewed test contract, isolated execution | A real project's bug can be reproduced and fixed without weakening tests or running unreviewed commands on the host |
+| Current local milestone: trusted Node repositories | Node test-runner adapter, exact Git snapshots, frozen tests, structured proofs | Correct repairs and recurrence pass the conformance fixtures; altered tests, empty/skipped tests, setup failures, timeouts and flaky results fail closed. Host execution requires explicit trust; OS/container isolation remains future work |
 | Then: smoother workflow | Visual test editor, relevant case suggestions, CI evidence reports | Developers maintain reviewed checks with little setup; required CI fails closed on missing or failed checks |
 | Later: expand | Python/pytest, browser reproduction with Playwright, intent-aware test migrations | Each adapter passes an identical conformance suite and distinguishes application failure from infrastructure failure |
 | Later: share carefully | Versioned public failure-pattern packs and optional team service | Provenance, secret review, version compatibility, trust boundaries and moderation are explicit |
 
 For repository support, reproduce baseline and candidate in disposable snapshots, pin dependencies/environment where practical, prevent agent writes to the evaluator, and record the exact executed revision. Review changes before applying or merging them. Do not label a host process or `vm` context a secure sandbox.
+
+The current [repository adapter](REPOSITORIES.md) supports committed standalone JavaScript projects through the library and CLI. MCP can inspect plans and read proof summaries; it cannot authorize repository execution. Durable repository lessons, automatic CI/hooks, bug-to-test forms, stronger isolation and the real-bug evaluation remain on the [staged implementation plan](IMPLEMENTATION_PLAN.md). Existing function lessons continue to work independently.
 
 ## How to evaluate it
 

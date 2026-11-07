@@ -2,6 +2,8 @@
 
 The agent's MCP client starts REGRA over local stdio. No dashboard, hosted endpoint, API key or Ollama model is required. Each server is scoped to its configured project root.
 
+For the new Node repository adapter, `regra_repository` provides read-only `inspect`, `plan` and `evidence` actions. It cannot run repository code or accept a trust flag. Use the [repository guide](REPOSITORIES.md) for an explicit CLI/library execution after reviewing the plan. Restart an already-running MCP server after updating REGRA so the new tool is discovered.
+
 ```sh
 regra init --root . --demo
 regra connect --client cursor --root .

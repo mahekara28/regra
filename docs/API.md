@@ -21,7 +21,11 @@ Use an explicit directory when your agent changes working directories. Instances
 
 Filters use exact function identity and simple case-insensitive text matching. The default limit is 20, maximum 100. Use `summarizeRun(run)` for compact agent results with gates, failures, hashes, and `canProceed`.
 
-## Contract
+## Repository verification
+
+For committed Node projects, the top-level typed APIs are `inspectRepository`, `planRepository`, `verifyRepository`, `checkRepository` and `readRepositoryProof`. These share the repository CLI's acceptance rules and store proofs separately under `.regra/repository/proofs/`. Execution requires `trusted: true`; it is not available as an MCP action. See [repository API and commands](REPOSITORIES.md#library).
+
+## Function contract
 
 ```ts
 import type { ScopedSpec } from '@mahekara28/regra';
