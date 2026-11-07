@@ -1,190 +1,152 @@
 # REGRA
 
-**Every fix earns its proof.**
+**Verification and regression memory for coding agents.**
 
-Executable memory for coding agents. A reproducible bug becomes a test; a proposed fix must pass it and preserve earlier behavior. Verified lessons stay available across agent sessions.
+Check proposed repairs against reproducible tests. Keep verified function lessons and inspect the evidence behind repository changes.
 
-Use REGRA as a **JavaScript/TypeScript library**, **local MCP server**, **CLI**, or **browser dashboard**. All four share one verification engine and evidence store. REGRA does not retrain models.
+[Interactive demo](https://mahekara28.github.io/regra/) · [Quick start](#quick-start) · [Agent setup](#connect-an-agent) · [Repository checks](#verify-a-repository) · [API](docs/API.md)
 
-> **Release status:** this checkout contains `0.2.0-beta.1`, not yet published to npm. Use the local installation below. GitHub installation requires pushing these changes first; registry installation requires a separate npm release.
+[![REGRA's three test layers: original code, a verified patch and saved cases.](site/assets/social-card.png)](https://mahekara28.github.io/regra/)
 
-## Public demo website
+**Source beta · 0.2.0-beta.1 · Node.js 22.13+ · MIT**
 
-The public website lives in [`site/`](site/). Its wine, silver and lime palette frames an interactive 3D view of the original code, proposed patch and saved cases. Three working repair examples, inspectable contracts and copyable setup commands follow. Documentation and the local-workbench capture open on demand. From this repository checkout:
+## Why REGRA?
 
-```sh
-npm run site:preview
-```
+An agent fixes an empty-input crash by returning zero for every input. The crash is gone, but ordinary inputs are now wrong. REGRA rejects that patch because the existing checks fail.
 
-Open **http://127.0.0.1:4318/regra/**. Node alone is enough for the static preview; it uses the same `/regra/` path as GitHub Pages. The existing local dashboard still starts with `npm start` on port 4317.
+For supported functions, a verified repair becomes a saved lesson that later changes can be checked against. For Node repositories, REGRA compares two committed revisions and records the tests, failures and decision.
 
-The website's prepared functions run in the browser; temporary demo lessons reset on reload. It does not access a visitor's projects or agents. The installed library/MCP server/dashboard perform real project verification and retain evidence on disk.
+## Quick start
 
-The deployment target is **https://mahekara28.github.io/regra/**. Publishing requires enabling GitHub Actions in the repository's Pages settings and pushing the website changes to `main`; adding these files alone does not make it live. See the [website and deployment guide](docs/WEBSITE.md).
-
-## Verify a real repository
-
-For the new real-project adapter, see [repository verification](docs/REPOSITORIES.md). It discovers committed Node tests, previews two Git revisions and runs the same frozen suite against both in disposable snapshots:
+Requires **Node.js 22.13+ and Git**. Install this beta from source:
 
 ```sh
-regra inspect --root .
-regra repo-verify --root . --baseline main --candidate HEAD --dry-run
-regra repo-verify --root . --baseline main --candidate HEAD --trusted
+npm install --global github:mahekara28/regra
 ```
 
-Use your actual broken/fixed Git refs. Execution requires reviewed, trusted code; snapshots are not a hostile-code sandbox. Add `--install-deps` only when you explicitly want lockfile-based dependency installation with lifecycle scripts disabled. `repo-check` provides a regression-only gate, and `regra_repository` lets an MCP agent inspect plans and proof summaries without executing repository code.
-
-The [implementation plan](docs/IMPLEMENTATION_PLAN.md) tracks the supplied roadmap: repository verification first, then durable repository lessons/CI automation, easier setup and bug-to-test forms. No paid API is required.
-
-## Connect an agent
-
-Requires **Node.js 22.13+**. From this updated REGRA checkout, install once:
-
-```sh
-npm ci
-npm install -g .
-```
-
-Then open a terminal in the project you want to protect:
+Then run these commands **inside an existing project folder**:
 
 ```sh
 regra init --root . --demo
+regra demo --root .
+regra ui --root .
+```
+
+The demo verifies a prepared repair and saves its evidence. Open [the local dashboard](http://127.0.0.1:4317) to inspect results and try the examples. Stop it with Ctrl+C. The dot means your current folder; REGRA does not create a new project directory.
+
+No REGRA account, API key or model is required. Your coding agent keeps its own provider costs.
+
+<details>
+<summary>Install from a local clone</summary>
+
+```sh
+git clone https://github.com/mahekara28/regra.git
+cd regra
+npm ci
+npm install --global .
+```
+
+Already cloned? Run the last two commands from your REGRA checkout.
+
+</details>
+
+## Connect an agent
+
+After initializing your project, run:
+
+```sh
 regra connect --client cursor --root .
 regra doctor --root .
 ```
 
-Replace `cursor` with **`claude`**, **`codex`**, or **`vscode`**. `--demo` adds a teaching case and example functions; omit it for an empty setup. `--project my-app` sets an explicit project key at initialization.
+Use `cursor`, `claude`, `codex` or `vscode`. Restart the agent in that project, accept its normal MCP trust prompt, and ask:
 
-Restart the agent in that project and accept its normal MCP/trust prompt. Ask:
+> Call regra_status and regra_context. Review the average case, then verify the original and fixed functions in regra-examples using its caseFile and caseHash. Show the decision and proof ID.
 
-> Call regra_status and regra_context. Inspect the average case and its expected behavior. Verify the original and fixed functions in regra-examples using the caseFile and caseHash returned by context. Show me the result and proof ID.
+The agent starts REGRA over local MCP; the dashboard can stay closed. For your own cases, omit `--demo` during initialization and review the expected behavior before verifying a repair.
 
-The agent starts REGRA over stdio. **No dashboard server, API key, model download, or Ollama installation is needed for MCP.** Your agent supplies its own model.
+[Connection guide](docs/CONNECTIONS.md) covers configuration files, connection checks and disconnecting.
 
-To try setup in this REGRA checkout without a global install, run from the REGRA folder. The dot means your current folder:
+## Verify a repository
 
-```powershell
-node src/cli.mjs init --root . --demo
-node src/cli.mjs connect --client codex --root .
-node src/cli.mjs doctor --root .
-```
-
-For another project, replace the dot with that project's existing folder path in quotes. REGRA adds its files inside an existing project; it does not create a new project directory. The dashboard's **Connections** page checks the folder and generates commands with absolute paths. See [connection guide](docs/CONNECTIONS.md).
-
-## Import the library
-
-Install this checkout in another Node project:
+In a Git project with a committed `node --test` suite, inspect and preview first:
 
 ```sh
-npm install --save-dev /absolute/path/to/regra
+regra inspect --root .
+regra repo-verify --root . --baseline main --candidate HEAD --dry-run
 ```
 
-After the updated code is pushed, users can install directly from GitHub:
+Replace `main` with the broken revision and `HEAD` with the proposed fix. Both refs must exist locally; uncommitted edits are excluded.
+
+After reviewing the plan and trusting the selected code:
+
+```sh
+regra repo-verify --root . --baseline main --candidate HEAD --trusted
+regra repo-evidence --id YOUR_PROOF_ID --json
+```
+
+Use the proof ID printed by verification. REGRA runs the same frozen test suite three times per revision in fresh snapshots. Snapshots protect the checkout from ordinary test writes; **they are not a security sandbox**.
+
+Use `repo-check` instead of `repo-verify` for a regression check that does not require a previously failing test. The MCP tool `regra_repository` exposes read-only inspection, planning and evidence; repository execution uses the CLI or library.
+
+[Repository guide](docs/REPOSITORIES.md) covers dependency installation, supported projects and proof records.
+
+## Use the library
+
+Add REGRA to your Node project:
 
 ```sh
 npm install --save-dev github:mahekara28/regra
 ```
 
+Save as `check-regra.mjs` and run `node check-regra.mjs`:
+
 ```js
 import { createRegra } from '@mahekara28/regra';
 
-const regra = createRegra({ project: 'my-app', directory: '.regra' });
+const regra = createRegra({ project: 'my-app' });
 const proof = await regra.verify({
   spec: {
-    entry: 'average', title: 'Empty input returns zero',
+    entry: 'average',
+    title: 'Empty input returns zero',
     repro: { name: 'Empty', args: [[]], expect: 0 },
     checks: [{ name: 'Numbers', args: [[2, 4]], expect: 3 }]
   },
-  before: 'function average(xs) { return xs.reduce((a,b) => a+b) / xs.length; }',
-  after: 'function average(xs) { return xs.length ? xs.reduce((a,b) => a+b, 0) / xs.length : 0; }'
+  before: 'function average(xs) { return xs.reduce((a, b) => a + b) / xs.length; }',
+  after: 'function average(xs) { return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0; }'
 });
 
-if (proof.status !== 'verified') {
-  // Return the failing evidence to your agent for another repair.
-}
-const lessons = await regra.context({ entry: 'average' });
+console.log(proof.status); // verified
 ```
 
-TypeScript declarations ship with the package. Imports start no server and write no files. The engine needs no model. See [API reference](docs/API.md) and [runnable example](examples/library.mjs).
+Verified function lessons persist in `.regra/`. Retrieve them with `regra.context()` and replay them with `regra.check()`. Add `.regra/` to `.gitignore` if you skip `regra init`. TypeScript declarations are included.
 
-## Agent tools
-
-| MCP tool | Purpose |
-| --- | --- |
-| `regra_status` | Identify the scoped project, runtime and evidence counts |
-| `regra_repository` | Inspect committed Node tests, preview Git comparisons or read repository proof summaries; does not execute code |
-| `regra_context` | Retrieve lessons and case files with contract fingerprints |
-| `regra_verify` | Check original/proposed code against an existing case; retain proof and verified lessons |
-| `regra_check` | Replay a contract and saved lessons against current code |
-| `regra_evidence` | Retrieve the exact recorded proof by ID |
-
-There is also a project status resource and a `repair_with_regra` prompt. Compatibility is tested with the current official SDK and a 2025-era initialize exchange.
-
-**MCP makes tools available; it does not force an agent to use them.** For enforcement, run the CLI check in CI and require that check in repository settings. REGRA does not apply patches, merge, or push code.
+[API reference](docs/API.md) · [Runnable example](examples/library.mjs)
 
 ## Verification rules
 
-All five gates must pass: reproduce the failure on the original; confirm existing checks pass before the change; pass the new case after the change; preserve existing checks and saved lessons; and obtain consistent pass/fail results on three runs with no setup errors.
+A repair must reproduce the original failure, fix it while preserving passing behavior, and produce consistent results across three runs.
 
-A syntax error, missing function, timeout, unsupported result or non-reproducing case is **inconclusive**. A repair that fails behavior checks is **rejected**. Only a **verified** before/after result creates a lesson.
+| Decision | Meaning |
+| --- | --- |
+| **Verified** | The recorded acceptance checks passed. |
+| **Rejected** | The proposed repair fails a behavior check. |
+| **Inconclusive** | Setup, reproduction or repeatability could not establish a valid result. |
 
-MCP verification requires a file in `regra-cases/` and its `caseHash` from context. A changed contract or inline replacement expectation is refused. The hash detects changed data; it does not establish human review. A person must review intended behavior, and an agent with other filesystem tools still has the access its host grants.
+Tests cover their recorded behavior. REGRA does not retrain the model, apply patches or guarantee unseen cases. MCP makes verification available; a required CI check enforces it.
 
 ## Current scope
 
-Reviewed, self-contained **synchronous JavaScript function declarations**, with JSON inputs/results or named thrown errors. No imports, exports, browser APIs, promises, package dependencies, dates, undefined, non-finite numbers, or cyclic results. Equality is exact, including floating-point numbers.
-
-`args: [[]]` means one empty-list argument. `expect: 0` requires a zero result; use `throws: "TypeError"` instead for an expected error. Returning zero for an empty average is a chosen demo rule, not a universal mathematical definition.
-
-**Whole-repository test execution, Python, browser tests, and arbitrary shell commands are not implemented.** Three repeated runs sample repeatability; tests cover only their recorded behavior.
-
-## Dashboard and CLI
-
-From the clone: `npm start`, or double-click `Start-Regra.cmd` on Windows after installing dependencies. From an installed package:
-
-```sh
-regra ui --root /path/to/project
-```
-
-Open **http://127.0.0.1:4317**. Compare a prepared bad fix and correct fix, inspect lessons, and use Connections for setup. Optional AI drafts use installed local Ollama models and never bypass verification.
-
-The verification desk keeps the behavior contract beside both code versions. Existing checks have a readable preview, and results show expected values beside observed outputs. Use **Ctrl+Enter** (Command+Enter on macOS) to verify, **Reset** to restore the candidate from the original, and the Evidence filters to inspect a particular decision. Saved lessons link back to their original proof. The dashboard uses a turquoise/navy theme with technical sans-serif headings. All typography and assets load locally.
-
-```sh
-regra connect --client claude --root . --dry-run
-regra connections --root .
-regra disconnect --client claude --root .
-regra verify --root . --case regra-cases/average.case.json --before regra-examples/average.before.js --after regra-examples/average.fixed.js
-regra check --root . --case regra-cases/average.case.json --source regra-examples/average.fixed.js
-regra lessons --json
-regra context --project my-app
-```
-
-From the clone, replace `regra` with `node src/cli.mjs`. `--root` sets relative paths and default evidence storage. Standalone CLI commands also accept `--store PATH`; MCP uses its initialized project's store. Exit codes: **0** passed/success, **1** rejected/inconclusive or failed doctor, **2** setup error. Add `--json` for structured results. `check` uses the provided case even on a fresh machine without history.
-
-## Connections, storage and cost
-
-Connection setup preserves other settings and JSON comments, refuses conflicts, and removes only its managed entry on disconnect. It changes project-local configuration, not global settings. Entries contain absolute paths for this machine; keep the installed package in place and reconnect if it moves. Each teammate runs setup locally. Doctor checks the protocol but does not observe whether an editor loaded REGRA.
-
-| File | Purpose |
+| Mode | Supported today |
 | --- | --- |
-| `regra.config.json` | Project identity; commit it |
-| `regra-cases/*.case.json` | Reviewed contracts; commit after reviewing their data |
-| `REGRA.md` | Short agent workflow guide |
-| `.regra/state.json` | Code, inputs, results and lessons; ignored by Git |
-| `.regra/connections.json` | Machine-specific managed entry records; ignored by Git |
+| Function verification | Synchronous, self-contained JavaScript declarations with JSON values or named thrown errors. No imports, exports or promises. Verified lessons can be retained and replayed. |
+| Repository verification | Committed, standalone JavaScript projects using `node --test`, including imports and exports. Proofs are saved separately from function lessons. |
 
-No REGRA account, hosted database, paid API or subscription is required. Execution uses your computer. A connected coding agent keeps its existing account/provider costs; Ollama is optional.
+Jest, Vitest, TypeScript loaders, Python, browser-test adapters and monorepos are not supported yet. Reusable repository lessons and automatic hook/workflow installation are [planned](docs/IMPLEMENTATION_PLAN.md).
 
-Evidence uses locked, atomic writes. Corrupt history is preserved and reported. If a crash leaves `write.lock` or `connections.lock` under `.regra`, stop all REGRA processes using the project before removing only the stale lock. History is not automatically pruned. Review source and inputs before exporting.
+Evidence stays in the project's `.regra/` directory, which `regra init` adds to `.gitignore`. Commit reviewed contracts in `regra-cases/`; inspect evidence before exporting it. Use reviewed code locally.
 
-The runner uses a child process, fresh VM contexts, Node permissions and resource limits. **These are not a security sandbox for hostile code.** Use reviewed code locally; an OS/container boundary is needed before public or untrusted repository execution. MCP paths reject traversal and symlinks, while the local owner still controls files on disk.
-
-## With Context Relay
-
-[Context Relay](https://github.com/mahekara28/context-relay) carries reviewed working context between sessions. REGRA contributes executable checks and proof IDs. Include those references in a handoff so the next agent can retrieve evidence. No automatic cross-application delivery is implemented, and neither project depends on the other.
-
-## Development
+## Develop
 
 ```sh
 npm ci
@@ -193,10 +155,8 @@ npm run typecheck
 npm run test:package
 ```
 
-The package smoke check packs, installs into a fresh consumer using the npm cache, imports the API, checks TypeScript declarations, runs the CLI, and performs real MCP discovery. Run `npm ci` first to populate the cache.
+For the public website, run `npm run site:preview` and open [the preview](http://127.0.0.1:4318/regra/). Its prepared examples run in the browser and reset on reload.
 
-The GitHub Actions workflow runs these checks on Windows and Linux with Node 22 and 24 when you push. Local validation results and remaining platform limits are recorded in [Validation](docs/VALIDATION.md).
+[Validation](docs/VALIDATION.md) · [Website guide](docs/WEBSITE.md) · [Roadmap](docs/IMPLEMENTATION_PLAN.md) · [Release guide](docs/RELEASING.md) · [Report an issue](https://github.com/mahekara28/regra/issues)
 
-[API](docs/API.md) · [Connections](docs/CONNECTIONS.md) · [Product direction](docs/PRODUCT.md) · [Validation](docs/VALIDATION.md) · [Release steps](docs/RELEASING.md)
-
-MIT licensed. Preparing this release does not publish it or register a domain/trademark.
+[MIT license](LICENSE) · Built by [Mahek Ara](https://github.com/mahekara28)

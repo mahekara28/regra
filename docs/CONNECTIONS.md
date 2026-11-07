@@ -41,7 +41,7 @@ Inline replacement expectations are refused. A contract changed since retrieval 
 
 `regra_check` takes `caseFile` and `source` to replay behavior without creating a new lesson. Missing contracts and invalid paths cannot produce a passing result.
 
-MCP makes these tools available; it does not require the agent to call them. For enforcement, run `regra check` as a required CI check for supported standalone source. Whole-repository execution remains planned.
+MCP makes these tools available; it does not require the agent to call them. For enforcement, run `regra check` as a required CI check for supported standalone functions, or `regra repo-check` through an explicitly trusted CLI/library workflow for supported committed Node repositories. See the [repository guide](REPOSITORIES.md); the repository MCP tool itself remains read-only.
 
 ## Disconnect
 
