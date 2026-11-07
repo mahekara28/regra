@@ -20,7 +20,7 @@ function npm(args, cwd = repository) { return command([npmCli, ...cacheArgs, '--
 try {
   const packed = JSON.parse(npm(['pack', '--json', '--ignore-scripts', '--pack-destination', temp]))[0];
   if (packed.files.some(f => /^(?:node_modules|\.regra|tests)\//.test(f.path))) throw new Error('Unexpected private/development files in npm tarball.');
-  for (const file of ['src/index.mjs', 'src/index.d.ts', 'src/cli.mjs', 'src/mcp.mjs', 'src/runner.cjs', 'public/index.html']) if (!packed.files.some(f => f.path === file)) throw new Error(`Package is missing ${file}.`);
+  for (const file of ['src/index.mjs', 'src/index.d.ts', 'src/cli.mjs', 'src/mcp.mjs', 'src/runner.cjs', 'src/repository/index.mjs', 'src/repository/node-worker.mjs', 'src/repository/snapshot.mjs', 'src/repository/process.mjs', 'public/index.html']) if (!packed.files.some(f => f.path === file)) throw new Error(`Package is missing ${file}.`);
   const consumer = path.join(temp, 'consumer'); await mkdir(consumer);
   await writeFile(path.join(consumer, 'package.json'), JSON.stringify({ name: 'regra-install-check', private: true, type: 'module' }));
   // A fresh consumer needs registry metadata, which npm ci's tarball cache may lack.
