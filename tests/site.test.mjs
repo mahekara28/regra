@@ -83,21 +83,21 @@ test('Pages build contains only public assets; preview serves project paths and 
 const themeSource = await readFile(new URL('../site/theme.js', import.meta.url), 'utf8');
 function themeBrowser({ stored = null, storageDenied = false } = {}) {
   const listeners = {}, clicks = {};
-  const root = { dataset: {} }, meta = {}, label = {};
+  const root = { dataset: {} }, meta = {};
   const button = { hidden: true, setAttribute(name, value) { this[name] = value; }, addEventListener(name, listener) { clicks[name] = listener; } };
   const storage = { getItem() { if (storageDenied) throw Error('denied'); return stored; }, setItem(key, value) { if (storageDenied) throw Error('denied'); stored = value; } };
   let ready = false;
   runInNewContext(themeSource, {
     document: {
       documentElement: root, querySelector: () => meta,
-      getElementById: id => ready ? ({ 'theme-toggle': button, 'theme-label': label }[id] || null) : null,
+      getElementById: id => ready && id === 'theme-toggle' ? button : null,
       addEventListener(name, listener) { listeners[name] = listener; }
     },
     window: { addEventListener(name, listener) { listeners[name] = listener; } },
     localStorage: storage
   });
   return {
-    root, button, meta, label, stored: () => stored,
+    root, button, meta, stored: () => stored,
     ready() { ready = true; listeners.DOMContentLoaded(); },
     click() { clicks.click(); },
     storage(key, newValue) { listeners.storage({ key, newValue }); }
@@ -111,6 +111,7 @@ test('theme defaults to black before paint and preserves an explicit day-mode ch
   browser.ready();
   assert.equal(browser.button.hidden, false);
   assert.equal(browser.button['aria-pressed'], 'true');
+  assert.equal(browser.button.title, 'Switch to day mode');
   browser.click();
   assert.equal(browser.stored(), 'light');
   assert.equal(browser.button['aria-pressed'], 'false');
@@ -126,7 +127,7 @@ test('theme remains usable when storage is denied and ignores invalid preference
   denied.click();
   assert.equal(denied.root.dataset.theme, 'light');
   assert.equal(denied.meta.content, '#f0f0e9');
-  assert.equal(denied.label.textContent, 'Day');
+  assert.equal(denied.button.title, 'Switch to dark mode');
   denied.click();
   assert.equal(denied.root.dataset.theme, 'dark');
   const invalid = themeBrowser({ stored: 'unexpected' });

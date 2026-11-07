@@ -17,7 +17,6 @@
       button.hidden = false;
       button.setAttribute('aria-pressed', String(theme === 'dark'));
       button.title = `Switch to ${theme === 'dark' ? 'day' : 'dark'} mode`;
-      document.getElementById('theme-label').textContent = theme === 'dark' ? 'Night' : 'Day';
     }
   }
 

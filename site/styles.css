@@ -60,7 +60,7 @@ img { display: block; max-width: 100%; }
 .header-inner nav a:is(:hover, :focus-visible)::after { transform: scaleX(1); }
 .repo-link { border: 1px solid var(--control-line); padding: 6px 15px; border-radius: 4px; }
 .repo-link:hover { border-color: var(--accent); }
-.theme-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 38px; min-width: 84px; padding: 7px 11px; background: transparent; border: 1px solid var(--line); border-radius: 5px; font: 11px var(--mono); }
+.theme-toggle { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 38px; height: 38px; padding: 0; background: transparent; border: 1px solid var(--line); border-radius: 5px; }
 .theme-toggle:hover { background: var(--surface); border-color: var(--control-line); }
 .theme-moon, [data-theme="dark"] .theme-sun { display: none; }
 [data-theme="dark"] .theme-moon { display: block; }
@@ -339,8 +339,6 @@ details[open] > summary::before { content: "−"; }
   .brand { font-size: 16px; gap: 8px; } .brand img { width: 25px; height: 25px; }
   .header-inner nav { font-size: 12px; gap: 14px; }
   .header-inner .repository-nav { display: none; }
-  .theme-toggle { padding: 8px; min-width: 34px; min-height: 36px; }
-  #theme-label { display: none; }
   .repo-link { padding: 0; border: 0; }
   .hero { padding-top: 26px; gap: 10px; }
   .hero-copy { padding-block: 8px; } .eyebrow { font-size: 10px; margin-bottom: 18px; }
