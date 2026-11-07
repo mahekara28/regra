@@ -1,5 +1,19 @@
 # Validation record
 
+## Latest checks — 8 November 2026
+
+**Windows · Node 22.23.4 and 24.20.0 · 56 tests passed on each runtime.** TypeScript checking and the fresh-consumer package smoke test also passed on both versions. Package checks used a writable workspace npm cache and allowed missing dependencies to download.
+
+Reproduced **12 failures in the previous 54-test suite** by pointing the temporary-directory environment variables at a Windows junction. Connection assertions expected the original path spelling even though REGRA correctly stored the canonical path. Repository verification rejected snapshot cleanup because the temporary root and its resolved path differed, turning otherwise valid repairs into inconclusive results.
+
+Repository snapshots now use a canonical temporary parent captured before creation. Cleanup still verifies the exact parent, generated name, directory type and resolved location, and refuses symlinks or junctions. Connection assertions compare canonical paths. Two new regressions exercise all four clients through an aliased project path and verify that a repository repair completes, persists its proof and removes its snapshots when the temporary root is aliased. The full 56-test suite passed with that environment on both runtimes.
+
+The README's library example, initialization, demo, agent connection and doctor commands were executed successfully. Its 17 local links/anchors were checked. The evidence image was captured from actual local runs of the bundled average example. Markdown rendering was reviewed on desktop and mobile, with no page overflow at 1100, 768, 390 and 320 pixels.
+
+The existing [hosted run](https://github.com/mahekara28/regra/actions/runs/42405858591) passed on Linux and failed on Windows before these edits. A new hosted result requires the user's manual commit and push; these local checks do not establish that result.
+
+## Initial beta checks — 6 November 2026
+
 Checked on **6 November 2026**, for **0.2.0-beta.1**, on Windows with **Node.js v24.20.0** and npm 11.19.0.
 
 ## Automated checks
