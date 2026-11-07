@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, writeFile, readFile, rm, readdir, access } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, rm, readdir, access, realpath, symlink, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -80,6 +80,36 @@ test('real Git histories: discovery, repair proof, rejection, recurrence and che
   const caught = await checkRepository({ ...f, baseline: f.candidate, candidate: recurrence });
   assert.equal(caught.status, 'rejected');
   assert.equal(caught.canProceed, false);
+});
+
+test('repository verification cleans snapshots when TEMP is a directory alias', { timeout: 60000 }, async t => {
+  const f = await fixture(t);
+  const parent = await realpath(tmpdir());
+  const area = await mkdtemp(path.join(parent, 'regra-temp-alias-'));
+  const actual = path.join(area, 'actual');
+  const alias = path.join(area, 'temp alias');
+  t.after(async () => {
+    await unlink(alias).catch(error => { if (error.code !== 'ENOENT') throw error; });
+    assert.equal(path.dirname(area), parent);
+    assert.equal(await realpath(area), area);
+    assert.ok(path.basename(area).startsWith('regra-temp-alias-'));
+    await rm(area, { recursive: true, force: true, maxRetries: 3 });
+  });
+  await mkdir(actual);
+  await symlink(actual, alias, process.platform === 'win32' ? 'junction' : 'dir');
+  const run = spawnSync(process.execPath, [cli, 'repo-verify', '--root', f.root, '--baseline', f.baseline, '--candidate', f.candidate, '--trusted', '--json'], {
+    env: { ...process.env, TEMP: alias, TMP: alias, TMPDIR: alias },
+    encoding: 'utf8', windowsHide: true, timeout: 45000, maxBuffer: 3000000
+  });
+  assert.equal(run.status, 0, run.stderr + run.stdout);
+  const proof = JSON.parse(run.stdout);
+  assert.equal(proof.status, 'verified');
+  assert.equal(proof.beforeRuns.length, 3);
+  assert.equal(proof.afterRuns.length, 3);
+  assert.deepEqual(proof.findings, []);
+  assert.deepEqual(await readdir(actual), [], 'Disposable snapshots must be removed through the canonical path.');
+  assert.equal((await readRepositoryProof({ root: f.root, id: proof.id })).status, 'verified');
+  assert.equal(await readFile(path.join(f.root, 'average.mjs'), 'utf8'), fixed);
 });
 
 test('new regression cases are frozen and exercised on both old and new source', { timeout: 60000 }, async t => {

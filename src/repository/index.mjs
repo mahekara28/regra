@@ -118,8 +118,9 @@ async function capture(directory, testFiles, timeoutMs) {
   report = JSON.parse(JSON.stringify(report, (_key, value) => normalize(value)));
   return { ...report, results: report.results || [], exitCode: result.exitCode, signal: result.signal, timedOut: result.timedOut, outputLimit: result.outputLimit, error: result.error, durationMs: result.durationMs, stderr: normalize(result.stderr.toString('utf8').slice(0, 32000)) };
 }
-async function cleanScratch(directory) {
-  if (path.dirname(directory) !== path.resolve(tmpdir()) || !path.basename(directory).startsWith('regra-repository-') || (await lstat(directory)).isSymbolicLink() || path.resolve(await realpath(directory)) !== path.resolve(directory)) throw new Error('Refusing cleanup of an unexpected snapshot directory.');
+async function cleanScratch(directory, parent) {
+  const stat = await lstat(directory);
+  if (path.dirname(directory) !== parent || !path.basename(directory).startsWith('regra-repository-') || !stat.isDirectory() || stat.isSymbolicLink() || await realpath(directory) !== directory) throw new Error('Refusing cleanup of an unexpected snapshot directory.');
   await rm(directory, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
 }
 async function persist(root, proof) {
@@ -143,7 +144,7 @@ async function evaluate(options, mode) {
   };
   if (expectedPlanHash && expectedPlanHash !== plan.planHash) proof.findings.push(issue('stale_plan', 'The revisions or test contract changed since preview. Review the new plan.'));
   if (installDependencies && !plan.hasLockfile) proof.findings.push(issue('lockfile_required', 'Commit package-lock.json before requesting npm ci. REGRA does not generate or update dependency locks.'));
-  let scratch;
+  let scratch, scratchRoot;
   try {
     if (!proof.findings.length) {
       const npm = installDependencies ? await npmExecutable() : null;
@@ -152,7 +153,9 @@ async function evaluate(options, mode) {
         if (version.exitCode !== 0) throw new Error('Could not identify the npm runtime.');
         proof.environment.npm = version.stdout.toString().trim();
       }
-      scratch = await mkdtemp(path.join(tmpdir(), 'regra-repository-'));
+      // Windows TEMP can use an 8.3 alias. Keep one canonical parent for creation and cleanup.
+      scratchRoot = await realpath(tmpdir());
+      scratch = await mkdtemp(path.join(scratchRoot, 'regra-repository-'));
       const contractMap = new Map(contracts.map(file => [file.path, file]));
       // Both sides receive exactly the candidate's frozen tests and fixtures.
       const baselineFiles = [...before.files.filter(file => !contractMap.has(file.path)), ...contracts];
@@ -184,7 +187,7 @@ async function evaluate(options, mode) {
     proof.findings.push(issue('setup_error', error.message));
   } finally {
     if (scratch) {
-      try { await cleanScratch(scratch); }
+      try { await cleanScratch(scratch, scratchRoot); }
       catch (error) { proof.findings.push(issue('cleanup_error', error.message)); }
     }
   }

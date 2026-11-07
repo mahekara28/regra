@@ -4,7 +4,7 @@ import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { mkdtemp, readFile, writeFile, mkdir, rm, symlink } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile, mkdir, rm, symlink, realpath, unlink } from 'node:fs/promises';
 import { parse as jsonc } from 'jsonc-parser';
 import { parse as toml } from 'smol-toml';
 import { initProject, openProject, loadCase, listCases } from '../src/project.mjs';
@@ -63,7 +63,7 @@ for (const client of Object.keys(CLIENTS)) {
       const parsed = client === 'codex' ? toml(added) : jsonc(added);
       assert.equal(parsed[info.key].other.command, 'other-command');
       assert.equal(parsed[info.key].regra.command, process.execPath);
-      assert.equal(parsed[info.key].regra.args.at(-1), root);
+      assert.equal(parsed[info.key].regra.args.at(-1), await realpath(root));
       assert.equal((await connect({ root, client })).status, 'unchanged');
       assert.equal((await connections(root)).find(c => c.client === client).status, 'configured');
       await disconnect({ root, client });
@@ -77,6 +77,32 @@ for (const client of Object.keys(CLIENTS)) {
     } finally { await rm(root, { recursive: true, force: true }); }
   });
 }
+test('connections use the canonical project path when opened through a directory alias', async () => {
+  const root = await mkdtemp(path.join(await realpath(tmpdir()), 'regra-connection-alias-'));
+  const project = path.join(root, 'project');
+  const alias = path.join(root, 'project alias');
+  try {
+    await mkdir(project);
+    await symlink(project, alias, process.platform === 'win32' ? 'junction' : 'dir');
+    await initProject({ root: alias, project: 'aliased-project' });
+    for (const client of Object.keys(CLIENTS)) {
+      await connect({ root: alias, client });
+      const info = CLIENTS[client];
+      const text = await readFile(path.join(project, info.file), 'utf8');
+      const config = client === 'codex' ? toml(text) : jsonc(text);
+      assert.equal(config[info.key].regra.args.at(-1), project);
+      assert.equal((await connect({ root: project, client })).status, 'unchanged');
+      assert.equal((await connections(alias)).find(c => c.client === client).status, 'configured');
+      await disconnect({ root: project, client });
+    }
+  } finally {
+    await unlink(alias).catch(error => { if (error.code !== 'ENOENT') throw error; });
+    assert.equal(await realpath(root), root);
+    assert.ok(path.basename(root).startsWith('regra-connection-alias-'));
+    await rm(root, { recursive: true, force: true, maxRetries: 3 });
+  }
+});
+
 test('connection conflicts and externally modified entries are not overwritten or deleted', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'regra-conflict-'));
   try {
