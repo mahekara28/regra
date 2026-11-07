@@ -5,8 +5,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 export const root = fileURLToPath(new URL('../../', import.meta.url));
 export const buildDirectory = path.join(root, '_site');
 export const publicFiles = Object.freeze([
-  'index.html', '404.html', 'styles.css', 'main.mjs', 'demo.mjs', 'scene.mjs',
+  'index.html', '404.html', 'styles.css', 'main.mjs', 'demo.mjs', 'scene.mjs', 'theme.js', 'repository.mjs',
   'assets/regra.svg', 'assets/workbench.jpg', 'assets/social-card.png',
+  'assets/fonts/instrument-sans-latin.woff2', 'assets/fonts/OFL.txt',
   'robots.txt', 'sitemap.xml'
 ]);
 
@@ -20,7 +21,10 @@ export async function buildSite() {
   if (existing?.isSymbolicLink()) throw new Error('Refusing to replace a linked website output directory.');
   await rm(buildDirectory, { recursive: true, force: true });
   await mkdir(path.join(buildDirectory, 'assets'), { recursive: true });
-  for (const file of publicFiles) await copyFile(path.join(root, 'site', file), path.join(buildDirectory, file));
+  for (const file of publicFiles) {
+    await mkdir(path.dirname(path.join(buildDirectory, file)), { recursive: true });
+    await copyFile(path.join(root, 'site', file), path.join(buildDirectory, file));
+  }
   return buildDirectory;
 }
 

@@ -1,5 +1,6 @@
 import { examples, verifyPrepared, retainLesson, replayLesson, sourceOf, contractOf } from './demo.mjs';
 import { updateScene } from './scene.mjs';
+import './repository.mjs';
 
 const byId = id => document.getElementById(id);
 let example = examples[0];
@@ -181,6 +182,7 @@ const configs = { cursor: '.cursor/mcp.json', claude: '.mcp.json', codex: '.code
 function renderInstall() {
   const library = installMode === 'library';
   const app = installMode === 'app';
+  const repository = installMode === 'repository';
   document.querySelectorAll('[data-install]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.install === installMode)));
   document.querySelectorAll('[data-agent]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.agent === agent)));
   byId('install-step-title').textContent = library ? 'Add the dependency' : 'Install the package';
@@ -196,6 +198,15 @@ function renderInstall() {
   byId('next-description').textContent = library ? 'Use proof.status to decide whether to accept a proposed repair. Retrieve lessons with regra.context() and replay them with regra.check().' : app ? 'Inspect the source and results in Workbench, Lessons and Evidence. Connections helps you configure an agent.' : 'Open the project, accept the normal MCP trust prompt and try this request:';
   byId('agent-prompt-box').hidden = installMode !== 'agent';
   byId('install-final-note').textContent = library ? 'Imports start no server. See the API reference below for the full verification and replay contract.' : app ? 'Stop the local server with Ctrl+C. Saved evidence stays in the project’s .regra folder.' : 'The agent starts REGRA over stdio. A dashboard server or REGRA API key is not required.';
+  if (repository) {
+    byId('setup-title').textContent = 'Inspect and preview';
+    byId('setup-description').textContent = 'Open a terminal in your existing Git project. Replace main with the broken revision and HEAD with the committed fix.';
+    byId('setup-command').textContent = 'regra inspect --root .\nregra repo-verify --root . --baseline main --candidate HEAD --dry-run';
+    byId('setup-note').textContent = 'These commands are read-only. The preview shows exact revisions, discovered tests and any blockers.';
+    byId('next-title').textContent = 'Review, then verify';
+    byId('next-description').textContent = 'After reviewing your trusted project and test plan, replace --dry-run with --trusted to execute. Read the proof ID printed by REGRA with regra repo-evidence --id YOUR_PROOF_ID.';
+    byId('install-final-note').textContent = 'Runs committed node --test projects. Repository snapshots are not a security sandbox; only execute code you trust.';
+  }
 }
 document.querySelectorAll('[data-install]').forEach(button => button.addEventListener('click', () => {
   installMode = button.dataset.install;

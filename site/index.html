@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#21151f">
-  <meta name="description" content="REGRA verifies an agent’s repair, keeps the tests, and checks the next change. A free local library, MCP server and CLI.">
+  <meta name="description" content="Verify code repairs with reproducible tests. Compare Git commits, inspect evidence, and connect your coding agent. Free, open source and local.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="REGRA — fix the bug, keep the test">
   <meta property="og:description" content="Verified repairs. Reusable tests. Local by default.">
@@ -17,6 +17,8 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="canonical" href="https://mahekara28.github.io/regra/">
   <link rel="icon" type="image/svg+xml" href="./assets/regra.svg">
+  <script src="./theme.js"></script>
+  <link rel="preload" href="./assets/fonts/instrument-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./main.mjs"></script>
   <title>REGRA — fix the bug, keep the test</title>
@@ -27,7 +29,8 @@
     <div class="wrap header-inner">
       <a class="brand" href="#main" aria-label="REGRA home"><img src="./assets/regra.svg" width="30" height="30" alt=""><span>REGRA</span></a>
       <span class="beta-label">Source beta</span>
-      <nav aria-label="Main navigation"><a href="#playground">Demo</a><a href="#install">Install</a><a href="https://github.com/mahekara28/regra" class="repo-link">GitHub</a></nav>
+      <nav aria-label="Main navigation"><a href="#playground">Demo</a><a class="repository-nav" href="#repositories">Repositories</a><a href="#install">Install</a><a href="https://github.com/mahekara28/regra" class="repo-link">GitHub</a></nav>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Dark mode" aria-pressed="false" hidden><svg class="theme-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg><svg class="theme-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M20.5 14.3A9 9 0 0 1 9.7 3.5a9 9 0 1 0 10.8 10.8Z"/></svg><span id="theme-label" aria-hidden="true">Day</span></button>
     </div>
   </header>
   <main id="main" tabindex="-1">
@@ -35,9 +38,10 @@
       <div class="hero-copy">
         <p class="eyebrow">Verification for coding agents</p>
         <h1 id="hero-title">Fix the bug.<br><span>Keep the test.</span></h1>
-        <p class="hero-description">REGRA checks an agent’s repair, saves verified cases, and replays them when the code changes.</p>
+        <p class="hero-description">Give your coding agent a test it has to pass. Verify the repair. Keep the evidence. Catch the same bug next time.</p>
         <div class="hero-actions"><a class="button primary" href="#playground">Try the demo</a><a class="button secondary" href="#install">Install REGRA</a></div>
         <p class="hero-footnote">Open source. Runs locally. No REGRA API key.</p>
+        <a class="release-link" href="#repositories"><span>New</span>Repository verification is here</a>
       </div>
       <figure class="case-visual" id="case-visual" data-spread="true" data-motion="false" data-visible="true" aria-label="Three-dimensional view of the original code, proposed patch and saved lesson in the prepared example">
         <div class="scene-topline"><span id="scene-file">average.js</span><span>Prepared example</span></div>
@@ -54,10 +58,10 @@
         <figcaption class="scene-caption"><span class="scene-status" id="scene-status">Prepared test cases</span><div class="scene-controls" hidden><label><input id="scene-layers" type="checkbox" checked>Layers</label><label><input id="scene-motion" type="checkbox" checked>Motion</label></div></figcaption>
       </figure>
     </section>
-    <div class="wrap product-line"><span>One verification engine.</span><div><span>JavaScript library</span><span>MCP</span><span>CLI</span><span>Local dashboard</span></div></div>
+    <div class="wrap product-line"><span>Your agent. Your project. Your tests.</span><div><a href="#install" data-open-install="library">JavaScript library</a><a href="#install" data-open-install="agent">MCP</a><a href="#repositories">CLI</a><a href="#install" data-open-install="app">Local dashboard</a></div></div>
     <div class="wrap page-content">
       <section class="section playground-section" id="playground" aria-labelledby="playground-title">
-        <div class="section-heading"><div><h2 id="playground-title">Test a fix.</h2><p>Fix the failing input. Keep the behavior that already works.</p></div><span class="context-label">Runs in your browser</span></div>
+        <div class="section-heading"><div><p class="section-index">01 / Try it</p><h2 id="playground-title">A fix has to earn its pass.</h2><p>Choose a patch. Run the tests. See exactly what survives.</p></div><span class="context-label live-label">Runs in your browser</span></div>
         <noscript><p class="notice">Enable JavaScript to run the prepared examples. Installation instructions and documentation work without it.</p></noscript>
         <div class="playground">
           <div class="case-picker" role="group" aria-label="Choose a demo case"><button type="button" data-case="empty-average" aria-pressed="true">Empty input</button><button type="button" data-case="slug-spaces" aria-pressed="false">URL spacing</button><button type="button" data-case="first-item" aria-pressed="false">Missing result</button><span class="example-label">Prepared examples</span></div>
@@ -87,9 +91,45 @@
         <p class="section-note">Prepared examples run in your browser. Lessons reset on reload.</p>
         <div class="sr-only" id="demo-announcement" role="status" aria-live="polite" aria-atomic="true"></div>
       </section>
+      <section class="section repository-section" id="repositories" aria-labelledby="repository-title">
+        <div class="section-heading"><div><p class="section-index">02 / New in the beta</p><h2 id="repository-title">From a function to a repository.</h2><p>Compare two Git commits against the same tests. Get a decision you can inspect.</p></div><span class="scope-tag">Node.js · Git · Local</span></div>
+        <div class="repo-workflow">
+          <div class="workflow-picker" role="group" aria-label="Repository workflow" hidden>
+            <button type="button" data-repo-step="inspect" aria-pressed="true" aria-controls="repo-inspect"><span class="workflow-number">01</span><span><strong>Inspect</strong><small>Find the committed test suite</small></span></button>
+            <button type="button" data-repo-step="plan" aria-pressed="false" aria-controls="repo-plan"><span class="workflow-number">02</span><span><strong>Preview</strong><small>Review exactly what will run</small></span></button>
+            <button type="button" data-repo-step="verify" aria-pressed="false" aria-controls="repo-verify"><span class="workflow-number">03</span><span><strong>Verify</strong><small>Run both revisions three times</small></span></button>
+            <button type="button" data-repo-step="proof" aria-pressed="false" aria-controls="repo-proof"><span class="workflow-number">04</span><span><strong>Read the proof</strong><small>Keep the reason and results</small></span></button>
+          </div>
+          <div class="workflow-content">
+            <div class="workflow-topline"><span>Terminal / your project</span><span class="workflow-local">Local execution</span></div>
+            <div class="workflow-panel" id="repo-inspect" aria-labelledby="repo-inspect-title">
+              <span class="permission-label">Read-only</span><h3 id="repo-inspect-title">Start with the project you have.</h3><p>REGRA discovers committed test files and checks whether its Node adapter can run your suite.</p>
+              <div class="command-box"><pre><code id="repo-inspect-command">regra inspect --root .</code></pre><button type="button" data-copy="repo-inspect-command" aria-label="Copy repository inspection command">Copy</button></div>
+              <dl class="workflow-facts"><div><dt>Supported now</dt><dd>Standalone JavaScript projects using <code>node --test</code></dd></div><div><dt>Not yet</dt><dd>Jest, Vitest, TypeScript loaders and monorepos</dd></div></dl>
+            </div>
+            <div class="workflow-panel" id="repo-plan" aria-labelledby="repo-plan-title">
+              <span class="permission-label">Read-only</span><h3 id="repo-plan-title">Freeze the comparison first.</h3><p>Review exact commit IDs, test files and blockers before any repository code runs.</p>
+              <div class="command-box"><pre><code id="repo-plan-command">regra repo-verify --root . --baseline main --candidate HEAD --dry-run</code></pre><button type="button" data-copy="repo-plan-command" aria-label="Copy repository preview command">Copy</button></div>
+              <dl class="workflow-facts"><div><dt>Choose your refs</dt><dd>Replace <code>main</code> with the broken revision and <code>HEAD</code> with the proposed fix. Both must exist locally.</dd></div><div><dt>Committed code only</dt><dd>Uncommitted edits are excluded. Your checkout and index stay in place.</dd></div></dl>
+            </div>
+            <div class="workflow-panel" id="repo-verify" aria-labelledby="repo-verify-title">
+              <span class="permission-label execution-label">Runs trusted project code</span><h3 id="repo-verify-title">Same tests. Two revisions.</h3><p>Fresh snapshots keep the comparison consistent. A repair must fix the failure and preserve the passing cases.</p>
+              <div class="command-box"><pre><code id="repo-verify-command">regra repo-verify --root . --baseline main --candidate HEAD --trusted</code></pre><button type="button" data-copy="repo-verify-command" aria-label="Copy repository verification command">Copy</button></div>
+              <dl class="workflow-facts"><div><dt>3 runs per revision</dt><dd>Flaky, skipped or empty tests leave the result inconclusive.</dd></div><div><dt>Review before running</dt><dd>Use your own trusted code. Snapshots protect the checkout; they are not a security sandbox.</dd></div></dl>
+            </div>
+            <div class="workflow-panel" id="repo-proof" aria-labelledby="repo-proof-title">
+              <span class="permission-label">Read-only</span><h3 id="repo-proof-title">Keep more than a green check.</h3><p>Every run records its decision, exact revisions, named tests, observed failures and logs in a local proof file.</p>
+              <div class="command-box"><pre><code id="repo-proof-command">regra repo-evidence --id YOUR_PROOF_ID --json</code></pre><button type="button" data-copy="repo-proof-command" aria-label="Copy repository evidence command">Copy</button></div>
+              <dl class="workflow-facts"><div><dt>Stored locally</dt><dd><code>.regra/repository/proofs/</code><br>Use the proof ID printed by verification.</dd></div><div><dt>Agent-readable</dt><dd>The MCP tool <code>regra_repository</code> can inspect, plan and read evidence. Repository execution stays in the CLI or library.</dd></div></dl>
+            </div>
+          </div>
+        </div>
+        <div class="verdict-guide" aria-label="How to read a repository decision"><div><span class="decision-dot verified-dot"></span><strong>Verified</strong><p>The recorded checks passed.</p></div><div><span class="decision-dot rejected-dot"></span><strong>Rejected</strong><p>The candidate still fails a check.</p></div><div><span class="decision-dot inconclusive-dot"></span><strong>Inconclusive</strong><p>Evidence cannot support a pass.</p></div></div>
+        <div class="repository-footnote"><p>Workflow guide; repository commands run on your computer. Reusable repository lessons are still in development.</p><a href="https://github.com/mahekara28/regra/blob/main/docs/REPOSITORIES.md">Read the repository guide</a></div>
+      </section>
       <section class="section install-section" id="install" aria-labelledby="install-title">
-        <div class="section-heading"><div><h2 id="install-title">Make it part of your project.</h2><p>Node.js 22.13+ and Git. Choose your connection.</p></div></div>
-        <div class="install-picker" role="group" aria-label="How to use REGRA"><button type="button" data-install="agent" aria-pressed="true">Connect an agent</button><button type="button" data-install="library" aria-pressed="false">JavaScript library</button><button type="button" data-install="app" aria-pressed="false">Local dashboard</button></div>
+        <div class="section-heading"><div><p class="section-index">03 / Connect</p><h2 id="install-title">Fits the way you already build.</h2><p>Node.js 22.13+ and Git. One package, several ways in.</p></div></div>
+        <div class="install-picker" role="group" aria-label="How to use REGRA"><button type="button" data-install="agent" aria-pressed="true">Connect an agent</button><button type="button" data-install="repository" aria-pressed="false">Repository CLI</button><button type="button" data-install="library" aria-pressed="false">JavaScript library</button><button type="button" data-install="app" aria-pressed="false">Local dashboard</button></div>
         <div class="install-content">
           <div class="install-step"><div class="install-step-heading"><span class="step-number">1</span><div><h3 id="install-step-title">Install the package</h3><p id="install-step-description">Install from the GitHub repository. A release on the npm registry is pending.</p></div></div><div class="command-box"><pre><code id="install-command">npm install --global github:mahekara28/regra</code></pre><button type="button" data-copy="install-command" aria-label="Copy installation command">Copy</button></div><details class="clone-option" id="clone-option"><summary>Installing from a local clone</summary><p>Run these commands from the REGRA repository folder:</p><div class="command-box"><pre><code id="clone-command">npm ci
 npm install --global .</code></pre><button type="button" data-copy="clone-command" aria-label="Copy local installation commands">Copy</button></div></details></div>
@@ -102,7 +142,8 @@ regra doctor --root .</code></pre><button type="button" data-copy="setup-command
       </section>
       <section class="project-details" id="docs" aria-label="Scope and documentation">
         <div class="faq-list">
-          <details><summary>What this beta checks</summary><p>Reviewed, synchronous JavaScript functions with JSON inputs and outputs. Cases must reproduce the bug, preserve existing behavior and pass three repeated runs. REGRA does not retrain models or guarantee untested behavior. <a href="https://github.com/mahekara28/regra#verification-rules">Verification rules</a></p></details>
+          <details><summary>What this beta checks</summary><p>Function checks verify reviewed, synchronous JavaScript with JSON inputs and outputs, then retain reusable lessons. Repository checks compare committed Node projects and save separate proof files. Both require reproducible results. REGRA does not retrain models or guarantee untested behavior. <a href="https://github.com/mahekara28/regra#verification-rules">Verification rules</a></p></details>
+          <details><summary>Can I use it as a regression check?</summary><p>Yes. Run <code>regra repo-check --root . --baseline main --candidate HEAD --trusted</code> with your own trusted commits. It checks for regressions without requiring a pre-existing failure. Automated hook installation and reusable repository lessons are still in development.</p></details>
           <details><summary>Free, local, and agent-independent</summary><p>MIT licensed. No paid REGRA service. Your chosen agent may have its own costs. MCP makes the tools available; required CLI checks in CI enforce their use.</p></details>
         </div>
         <details class="workbench-preview" id="workbench"><summary>Open the local workbench</summary><div class="workbench-content"><div class="command-box"><pre><code id="dashboard-command">regra ui --root .</code></pre><button type="button" data-copy="dashboard-command" aria-label="Copy dashboard command">Copy</button></div><a class="workbench-image" href="./assets/workbench.jpg" aria-label="Open full screenshot of the REGRA local workbench"><img src="./assets/workbench.jpg" width="1440" height="1040" loading="lazy" decoding="async" alt="The actual local REGRA workbench with a sample test contract and source code."></a></div></details>
