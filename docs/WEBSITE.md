@@ -1,6 +1,6 @@
 # Public website
 
-REGRA has a public introduction and playground, alongside its installed local dashboard. The website uses deep wine, cool silver and lime, with a short introduction, a working repair demo and installation instructions. Its three CSS 3D layers represent the original code, proposed patch and saved lesson. Cell colors and counts come from the demo's actual results. Scope details and the local-dashboard capture open on demand. It has no runtime dependencies, remote fonts, analytics, model calls, or connections to a visitor's local services.
+REGRA has a public introduction and playground, alongside its installed local dashboard. The website pairs a deep wine, silver and lime night theme with a mineral and olive day theme. Instrument Sans is self-hosted under its included SIL Open Font License. The page contains a working repair demo, repository workflow explorer and four installation options. Its three CSS 3D layers represent the original code, proposed patch and saved lesson; cell colors and counts come from actual demo results. Scope details and the local-dashboard capture open on demand. There are no runtime dependencies, remote fonts, analytics, model calls, or connections to a visitor's local services.
 
 ## Preview locally
 
@@ -20,10 +20,13 @@ Node.js 22.13+ is enough to build and preview the public website. `npm ci` is ne
 | --- | --- |
 | `site/index.html` | Page content, navigation, metadata and fallback install instructions |
 | `site/styles.css` | Theme, layout, responsive rules and focus states |
+| `site/theme.js` | Pre-paint system preference, persistent day/night choice and cross-tab synchronization |
+| `site/repository.mjs` | Progressive repository workflow navigation, including keyboard controls |
 | `site/main.mjs` | Demo controls, install modes, client selectors and copy buttons |
 | `site/scene.mjs` | Result-driven 3D surfaces, layer control, pointer tilt and motion preferences |
 | `site/demo.mjs` | Prepared functions, case expectations, browser verification and replay |
 | `site/assets/` | REGRA mark, actual dashboard screenshot and social preview image |
+| `site/assets/fonts/` | Instrument Sans Latin variable font and its unmodified OFL license |
 | `site/404.html` | Recovery links for missing Pages routes |
 | `scripts/site/build.mjs` | Copies the fixed public-asset allowlist into ignored `_site/` |
 | `scripts/site/preview.mjs` | Local preview with the `/regra/` project path |
@@ -31,6 +34,16 @@ Node.js 22.13+ is enough to build and preview the public website. `npm ci` is ne
 | `tests/site.test.mjs` | Demo behavior, parity with the engine, build and route checks |
 
 `_site/` is generated and replaced on each build. Do not put hand-edited files there. The build deploys only its fixed asset list; repository source, `.regra`, MCP configuration and other project data are not copied.
+
+## Appearance and repository workflow
+
+The first visit follows the operating system's light/dark preference. The header button chooses an explicit theme and stores only `regra-theme` in localStorage. The choice survives reloads and synchronizes between open tabs. If storage is unavailable, switching still works for the current page. Removing the preference returns to system behavior. The synchronous theme bootstrap runs before the stylesheet; without JavaScript, CSS follows the system and hides the inactive toggle. The 404 page uses the same preference.
+
+The repository explorer presents four real CLI stages: inspect, preview, verify and read evidence. Each copies a complete, single-line command suitable for PowerShell or a POSIX shell. Workflow buttons support arrows, Home, End, Enter and Space. All four stages remain readable without JavaScript. These are instructions for the installed CLI, not repository execution in the browser.
+
+The page distinguishes read-only inspection/planning from trusted host execution, explains the three possible decisions, and links to the full repository guide. The installation selector adds a Repository CLI route alongside agent, library and dashboard setup. Repository proof files are explicitly separate from retained function lessons; reusable repository lessons and automatic hook installation are not advertised as shipped features.
+
+Hover states cover navigation, buttons, case choices, result rows, workflow steps and disclosures. Keyboard focus is visible in both themes. The existing reduced-motion handling also disables new CSS transitions. There are no scroll-triggered text reveals or hidden essential content.
 
 ## What the demo does
 

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
+import { runInNewContext } from 'node:vm';
 import { examples, verifyPrepared, retainLesson, replayLesson, sourceOf, contractOf } from '../site/demo.mjs';
 import { examples as engineExamples } from '../src/examples.mjs';
 import { execute, validateSpec } from '../src/core.mjs';
@@ -73,5 +74,82 @@ test('Pages build contains only public assets; preview serves project paths and 
   }
   assert.equal((await fetch(`${base}/regra/`, { method: 'POST' })).status, 405);
   assert.equal((await fetch(`${base}/regra/main.mjs`)).headers.get('content-type'), 'text/javascript; charset=utf-8');
+  assert.equal((await fetch(`${base}/regra/theme.js`)).headers.get('content-type'), 'text/javascript; charset=utf-8');
+  assert.equal((await fetch(`${base}/regra/assets/fonts/instrument-sans-latin.woff2`)).headers.get('content-type'), 'font/woff2');
   assert.equal((await fetch(`${base}/regra/`, { method: 'HEAD' })).status, 200);
+});
+
+// Run the actual pre-paint script with browser event/storage boundaries.
+const themeSource = await readFile(new URL('../site/theme.js', import.meta.url), 'utf8');
+function themeBrowser({ systemDark = false, stored = null, storageDenied = false } = {}) {
+  const listeners = {}, clicks = {};
+  const root = { dataset: {} }, meta = {}, label = {};
+  const button = { hidden: true, setAttribute(name, value) { this[name] = value; }, addEventListener(name, listener) { clicks[name] = listener; } };
+  const media = { matches: systemDark, addEventListener(name, listener) { listeners.media = listener; } };
+  const storage = { getItem() { if (storageDenied) throw Error('denied'); return stored; }, setItem(key, value) { if (storageDenied) throw Error('denied'); stored = value; } };
+  let ready = false;
+  runInNewContext(themeSource, {
+    document: {
+      documentElement: root, querySelector: () => meta,
+      getElementById: id => ready ? ({ 'theme-toggle': button, 'theme-label': label }[id] || null) : null,
+      addEventListener(name, listener) { listeners[name] = listener; }
+    },
+    window: { matchMedia: () => media, addEventListener(name, listener) { listeners[name] = listener; } },
+    localStorage: storage
+  });
+  return {
+    root, button, meta, label, stored: () => stored,
+    ready() { ready = true; listeners.DOMContentLoaded(); },
+    click() { clicks.click(); },
+    system(dark) { media.matches = dark; listeners.media(); },
+    storage(key, newValue) { listeners.storage({ key, newValue }); }
+  };
+}
+
+test('theme follows the system before paint, then respects a saved manual choice', () => {
+  const browser = themeBrowser({ systemDark: true });
+  assert.equal(browser.root.dataset.theme, 'dark');
+  assert.equal(browser.meta.content, '#21151f');
+  browser.ready();
+  assert.equal(browser.button.hidden, false);
+  assert.equal(browser.button['aria-pressed'], 'true');
+  browser.system(false);
+  assert.equal(browser.root.dataset.theme, 'light');
+  browser.click();
+  assert.equal(browser.stored(), 'dark');
+  browser.system(false);
+  assert.equal(browser.root.dataset.theme, 'dark');
+  const reloaded = themeBrowser({ stored: browser.stored() });
+  assert.equal(reloaded.root.dataset.theme, 'dark');
+});
+
+test('theme remains usable when storage is denied and ignores invalid preferences', () => {
+  const denied = themeBrowser({ storageDenied: true, systemDark: true });
+  denied.ready();
+  denied.click();
+  assert.equal(denied.root.dataset.theme, 'light');
+  assert.equal(denied.meta.content, '#f0f0e9');
+  assert.equal(denied.label.textContent, 'Day');
+  denied.system(true);
+  assert.equal(denied.root.dataset.theme, 'light');
+  const invalid = themeBrowser({ stored: 'unexpected', systemDark: true });
+  assert.equal(invalid.root.dataset.theme, 'dark');
+  invalid.system(false);
+  assert.equal(invalid.root.dataset.theme, 'light');
+});
+
+test('theme synchronizes across tabs and returns to the system after clearing the preference', () => {
+  const browser = themeBrowser();
+  browser.ready();
+  browser.storage('another-setting', 'dark');
+  assert.equal(browser.root.dataset.theme, 'light');
+  browser.storage('regra-theme', 'dark');
+  assert.equal(browser.root.dataset.theme, 'dark');
+  browser.storage('regra-theme', null);
+  assert.equal(browser.root.dataset.theme, 'light');
+  browser.system(true);
+  assert.equal(browser.root.dataset.theme, 'dark');
+  browser.storage(null, null);
+  browser.system(false);
+  assert.equal(browser.root.dataset.theme, 'light');
 });
