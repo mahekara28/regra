@@ -1,6 +1,6 @@
 # Public website
 
-REGRA has a public introduction and playground, alongside its installed local dashboard. The website pairs a deep wine, silver and lime night theme with a mineral and olive day theme. Instrument Sans is self-hosted under its included SIL Open Font License. The page contains a working repair demo, repository workflow explorer and four installation options. Its three CSS 3D layers represent the original code, proposed patch and saved lesson; cell colors and counts come from actual demo results. Scope details and the local-dashboard capture open on demand. There are no runtime dependencies, remote fonts, analytics, model calls, or connections to a visitor's local services.
+REGRA has a public introduction and playground, alongside its installed local dashboard. The website uses a pure black canvas, charcoal work surfaces, silver test layers and lime accents. A mineral and olive day theme remains available. Instrument Sans is self-hosted under its included SIL Open Font License. The page contains a working repair demo, repository workflow explorer and four installation options. Its three CSS 3D layers represent the original code, proposed patch and saved lesson; cell colors and counts come from actual demo results. Scope details and the local-dashboard capture open on demand. There are no runtime dependencies, remote fonts, analytics, model calls, or connections to a visitor's local services.
 
 ## Preview locally
 
@@ -20,10 +20,10 @@ Node.js 22.13+ is enough to build and preview the public website. `npm ci` is ne
 | --- | --- |
 | `site/index.html` | Page content, navigation, metadata and fallback install instructions |
 | `site/styles.css` | Theme, layout, responsive rules and focus states |
-| `site/theme.js` | Pre-paint system preference, persistent day/night choice and cross-tab synchronization |
+| `site/theme.js` | Black default, persistent day/night choice and cross-tab synchronization before paint |
 | `site/repository.mjs` | Progressive repository workflow navigation, including keyboard controls |
 | `site/main.mjs` | Demo controls, install modes, client selectors and copy buttons |
-| `site/scene.mjs` | Result-driven 3D surfaces, layer control, pointer tilt and motion preferences |
+| `site/scene.mjs` | Result-driven 3D surfaces and pointer tilt that respects reduced-motion preferences |
 | `site/demo.mjs` | Prepared functions, case expectations, browser verification and replay |
 | `site/assets/` | REGRA mark, actual dashboard screenshot and social preview image |
 | `site/assets/fonts/` | Instrument Sans Latin variable font and its unmodified OFL license |
@@ -37,7 +37,7 @@ Node.js 22.13+ is enough to build and preview the public website. `npm ci` is ne
 
 ## Appearance and repository workflow
 
-The first visit follows the operating system's light/dark preference. The header button chooses an explicit theme and stores only `regra-theme` in localStorage. The choice survives reloads and synchronizes between open tabs. If storage is unavailable, switching still works for the current page. Removing the preference returns to system behavior. The synchronous theme bootstrap runs before the stylesheet; without JavaScript, CSS follows the system and hides the inactive toggle. The 404 page uses the same preference.
+The first visit uses black. The header button chooses an explicit theme and stores only `regra-theme` in localStorage. An existing day-mode preference is preserved; choices survive reloads and synchronize between open tabs. If storage is unavailable, switching still works for the current page. Removing the preference returns to black. The synchronous theme bootstrap runs before the stylesheet; without JavaScript, CSS uses black and hides the inactive toggle. The 404 page uses the same preference.
 
 The repository explorer presents four real CLI stages: inspect, preview, verify and read evidence. Each copies a complete, single-line command suitable for PowerShell or a POSIX shell. Workflow buttons support arrows, Home, End, Enter and Space. All four stages remain readable without JavaScript. These are instructions for the installed CLI, not repository execution in the browser.
 
@@ -59,7 +59,7 @@ The actual prepared function bodies are invoked with fresh inputs; there is no `
 
 The installed engine has separate process execution, setup-error handling, project scoping and persistent evidence. The public example is deliberately limited to illustrating its behavior. Node tests compare the demo's case expectations and outcomes with the shipped examples and real engine.
 
-The visual supports a collapsed stack and separated layers. Pointer tilt is limited to a fine mouse pointer. Motion can be turned off, respects the operating system's reduced-motion preference, and pauses offscreen or when the document is hidden. Controls are hidden without JavaScript. The public page uses no WebGL or animation library; the installed dashboard retains its own theme.
+The hero keeps the three separated layers without a duplicate status strip, file label or motion/layer controls. The graphic stays still until a fine mouse pointer moves over it. Tilt respects reduced motion and resets when the pointer leaves, the scene goes offscreen or the document is hidden. There is no continuous animation or background glow. The public page uses no WebGL or animation library; the installed dashboard retains its own theme.
 
 ## Installation content
 

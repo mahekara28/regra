@@ -1,7 +1,6 @@
 // Resolve the theme before the stylesheet paints. Storage is optional.
 (() => {
   const root = document.documentElement;
-  const preference = window.matchMedia('(prefers-color-scheme: dark)');
   const storageKey = 'regra-theme';
   const valid = value => value === 'light' || value === 'dark';
   let choice;
@@ -9,10 +8,10 @@
   if (!valid(choice)) choice = null;
 
   function apply() {
-    const theme = choice || (preference.matches ? 'dark' : 'light');
+    const theme = choice || 'dark';
     root.dataset.theme = theme;
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = theme === 'dark' ? '#21151f' : '#f0f0e9';
+    if (meta) meta.content = theme === 'dark' ? '#000000' : '#f0f0e9';
     const button = document.getElementById('theme-toggle');
     if (button) {
       button.hidden = false;
@@ -23,7 +22,6 @@
   }
 
   apply();
-  preference.addEventListener('change', () => { if (!choice) apply(); });
   window.addEventListener('storage', event => {
     if (event.key !== storageKey && event.key !== null) return;
     choice = valid(event.newValue) ? event.newValue : null;

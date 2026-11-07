@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#21151f">
+  <meta name="theme-color" content="#000000">
   <meta name="description" content="Verify code repairs with reproducible tests. Compare Git commits, inspect evidence, and connect your coding agent. Free, open source and local.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="REGRA — fix the bug, keep the test">
@@ -41,13 +41,10 @@
         <p class="hero-description">Give your coding agent a test it has to pass. Verify the repair. Keep the evidence. Catch the same bug next time.</p>
         <div class="hero-actions"><a class="button primary" href="#playground">Try the demo</a><a class="button secondary" href="#install">Install REGRA</a></div>
         <p class="hero-footnote">Open source. Runs locally. No REGRA API key.</p>
-        <a class="release-link" href="#repositories"><span>New</span>Repository verification is here</a>
       </div>
-      <figure class="case-visual" id="case-visual" data-spread="true" data-motion="false" data-visible="true" aria-label="Three-dimensional view of the original code, proposed patch and saved lesson in the prepared example">
-        <div class="scene-topline"><span id="scene-file">average.js</span><span>Prepared example</span></div>
+      <figure class="case-visual" id="case-visual" data-motion="false" data-visible="true" aria-label="Original code, proposed repair and saved tests, shown as three layers">
         <div class="scene-stage" id="scene-stage">
-          <div class="scene-floor" aria-hidden="true"></div>
-          <div class="scene-float" aria-hidden="true">
+          <div class="scene-object" aria-hidden="true">
             <div class="case-stack" id="case-stack">
               <div class="test-plate plate-lesson"><div class="plate-face"><div class="plate-heading"><span>Saved lesson</span><span class="plate-index">03</span></div><div class="plate-mark">REGRA</div><div class="plate-meta" id="scene-memory">No lesson saved</div><div class="plate-edge"></div></div><div class="plate-front"></div><div class="plate-right"></div></div>
               <div class="test-plate plate-patch"><div class="plate-face"><div class="plate-heading"><span id="scene-patch-label">Proposed patch</span><span class="plate-index">02</span></div><div class="scene-cells" id="scene-after"></div><div class="plate-meta" id="scene-patch-result">Ready to check</div><div class="plate-edge"></div></div><div class="plate-front"></div><div class="plate-right"></div></div>
@@ -55,7 +52,6 @@
             </div>
           </div>
         </div>
-        <figcaption class="scene-caption"><span class="scene-status" id="scene-status">Prepared test cases</span><div class="scene-controls" hidden><label><input id="scene-layers" type="checkbox" checked>Layers</label><label><input id="scene-motion" type="checkbox" checked>Motion</label></div></figcaption>
       </figure>
     </section>
     <div class="wrap product-line"><span>Your agent. Your project. Your tests.</span><div><a href="#install" data-open-install="library">JavaScript library</a><a href="#install" data-open-install="agent">MCP</a><a href="#repositories">CLI</a><a href="#install" data-open-install="app">Local dashboard</a></div></div>

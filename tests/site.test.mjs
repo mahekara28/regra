@@ -81,11 +81,10 @@ test('Pages build contains only public assets; preview serves project paths and 
 
 // Run the actual pre-paint script with browser event/storage boundaries.
 const themeSource = await readFile(new URL('../site/theme.js', import.meta.url), 'utf8');
-function themeBrowser({ systemDark = false, stored = null, storageDenied = false } = {}) {
+function themeBrowser({ stored = null, storageDenied = false } = {}) {
   const listeners = {}, clicks = {};
   const root = { dataset: {} }, meta = {}, label = {};
   const button = { hidden: true, setAttribute(name, value) { this[name] = value; }, addEventListener(name, listener) { clicks[name] = listener; } };
-  const media = { matches: systemDark, addEventListener(name, listener) { listeners.media = listener; } };
   const storage = { getItem() { if (storageDenied) throw Error('denied'); return stored; }, setItem(key, value) { if (storageDenied) throw Error('denied'); stored = value; } };
   let ready = false;
   runInNewContext(themeSource, {
@@ -94,62 +93,57 @@ function themeBrowser({ systemDark = false, stored = null, storageDenied = false
       getElementById: id => ready ? ({ 'theme-toggle': button, 'theme-label': label }[id] || null) : null,
       addEventListener(name, listener) { listeners[name] = listener; }
     },
-    window: { matchMedia: () => media, addEventListener(name, listener) { listeners[name] = listener; } },
+    window: { addEventListener(name, listener) { listeners[name] = listener; } },
     localStorage: storage
   });
   return {
     root, button, meta, label, stored: () => stored,
     ready() { ready = true; listeners.DOMContentLoaded(); },
     click() { clicks.click(); },
-    system(dark) { media.matches = dark; listeners.media(); },
     storage(key, newValue) { listeners.storage({ key, newValue }); }
   };
 }
 
-test('theme follows the system before paint, then respects a saved manual choice', () => {
-  const browser = themeBrowser({ systemDark: true });
+test('theme defaults to black before paint and preserves an explicit day-mode choice', () => {
+  const browser = themeBrowser();
   assert.equal(browser.root.dataset.theme, 'dark');
-  assert.equal(browser.meta.content, '#21151f');
+  assert.equal(browser.meta.content, '#000000');
   browser.ready();
   assert.equal(browser.button.hidden, false);
   assert.equal(browser.button['aria-pressed'], 'true');
-  browser.system(false);
-  assert.equal(browser.root.dataset.theme, 'light');
   browser.click();
-  assert.equal(browser.stored(), 'dark');
-  browser.system(false);
-  assert.equal(browser.root.dataset.theme, 'dark');
+  assert.equal(browser.stored(), 'light');
+  assert.equal(browser.button['aria-pressed'], 'false');
+  assert.equal(browser.root.dataset.theme, 'light');
   const reloaded = themeBrowser({ stored: browser.stored() });
-  assert.equal(reloaded.root.dataset.theme, 'dark');
+  assert.equal(reloaded.root.dataset.theme, 'light');
+  assert.equal(reloaded.meta.content, '#f0f0e9');
 });
 
 test('theme remains usable when storage is denied and ignores invalid preferences', () => {
-  const denied = themeBrowser({ storageDenied: true, systemDark: true });
+  const denied = themeBrowser({ storageDenied: true });
   denied.ready();
   denied.click();
   assert.equal(denied.root.dataset.theme, 'light');
   assert.equal(denied.meta.content, '#f0f0e9');
   assert.equal(denied.label.textContent, 'Day');
-  denied.system(true);
-  assert.equal(denied.root.dataset.theme, 'light');
-  const invalid = themeBrowser({ stored: 'unexpected', systemDark: true });
+  denied.click();
+  assert.equal(denied.root.dataset.theme, 'dark');
+  const invalid = themeBrowser({ stored: 'unexpected' });
   assert.equal(invalid.root.dataset.theme, 'dark');
-  invalid.system(false);
-  assert.equal(invalid.root.dataset.theme, 'light');
 });
 
-test('theme synchronizes across tabs and returns to the system after clearing the preference', () => {
+test('theme synchronizes across tabs and returns to black after clearing the preference', () => {
   const browser = themeBrowser();
   browser.ready();
-  browser.storage('another-setting', 'dark');
-  assert.equal(browser.root.dataset.theme, 'light');
-  browser.storage('regra-theme', 'dark');
+  browser.storage('another-setting', 'light');
   assert.equal(browser.root.dataset.theme, 'dark');
+  browser.storage('regra-theme', 'light');
+  assert.equal(browser.root.dataset.theme, 'light');
   browser.storage('regra-theme', null);
-  assert.equal(browser.root.dataset.theme, 'light');
-  browser.system(true);
   assert.equal(browser.root.dataset.theme, 'dark');
-  browser.storage(null, null);
-  browser.system(false);
+  browser.click();
   assert.equal(browser.root.dataset.theme, 'light');
+  browser.storage(null, null);
+  assert.equal(browser.root.dataset.theme, 'dark');
 });
